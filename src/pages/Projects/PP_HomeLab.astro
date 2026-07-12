@@ -1,0 +1,287 @@
+---
+import ProjectWriteupLayout from "../../components/ProjectPageTemplating/ProjectWriteupLayout.astro";
+import ProjectMediaGrid from "../../components/ProjectPageTemplating/ProjectMediaGrid.astro";
+import ContentBlock from "../../components/ProjectPageTemplating/ContentBlock.astro";
+---
+
+<ProjectWriteupLayout
+  title="Personal Homelab"
+  intro="A compact self-hosted server rack combining NAS storage, media services, network tools, custom cooling control, and PCB-based power distribution."
+>
+  <!-- =====================================================
+       01. PROJECT OVERVIEW
+       ===================================================== -->
+
+  <div slot="overview">
+    <ContentBlock>
+      <p>
+        A custom 10-inch homelab rack inspired by the Lab Rax Mini, designed as a compact NAS,
+        media server, and self-hosting platform. The system is built around a ZimaBoard 2 running
+        as the main server, hosting Immich for photo management and Jellyfin for media streaming,
+        with a secondary ZimaBlade handling Pi-hole and providing room for additional lightweight
+        network services in the future.
+      </p>
+
+      <p>
+        The rack has been adapted to suit my own storage, cooling, and power requirements,
+        with a custom PCB solution for HDD power delivery and thermal management. This includes
+        automatic fan control using an STM-based controller to read temperature sensors and adjust
+        cooling performance, alongside a manual fixed-speed mode using a 555 timer in astable operation.
+        The project combines 3D-printed mechanical design, self-hosted services, custom PCB design,
+        embedded control, and practical power distribution into a modular homelab system.
+      </p>
+
+      <ProjectMediaGrid
+        layout="stack"
+        media={[
+          {
+            src: "/Homelab/Home_Lab_Hero_Shot.jpg",
+            alt: "Completed Home Lab",
+            caption: "Completed Home Lab",
+          },
+        ]}
+      />
+    </ContentBlock>
+  </div>
+
+  <!-- =====================================================
+       02. KEY FEATURES
+       ===================================================== -->
+
+  <div slot="key-features">
+    <div class="feature-list">
+      <ContentBlock title="Custom PCB Power and Cooling System">
+        <p>
+          Custom PCB solution providing thermal control and SATA power delivery, designed to interface
+          with a compact 250 W power supply and support multiple storage drives and cooling fans.
+        </p>
+
+        <ProjectMediaGrid
+          layout="stack"
+          media={[
+            {
+              src: "/Homelab/Fan_Ctrl_Board_Render.jpg",
+              alt: "Fan control PCB render showing fan headers, RJ45 interfaces, controller circuitry, and power connections",
+              caption: "Fan control PCB render showing fan headers, RJ45 interfaces, controller circuitry, and power connections.",
+            },
+            {
+              src: "/Homelab/Fan_Aux_Board_Render.jpg",
+              alt: "Auxiliary fan and temperature board facilitating uppermost fan control",
+              caption: "Auxiliary fan and temperature board facilitating uppermost fan control.",
+            },
+            {
+              src: "/Homelab/SATA_PWR_Board_Render.jpg",
+              alt: "SATA power distribution PCB render showing SATA power connectors and board-to-board interface",
+              caption: "SATA power distribution PCB render showing SATA power connectors and board-to-board interface.",
+            },
+          ]}
+        />
+      </ContentBlock>
+
+      <ContentBlock title="Custom-designed NAS Rack Levels">
+        <p>
+          Each rack level uses a custom-designed panel tailored to the hardware it supports, including
+          fan panels, HDD bays, the network switch and ZimaBlade layer, the ZimaBoard server layer,
+          and the power supply section. This keeps the compact rack organised, serviceable, and
+          purpose-built around the final homelab layout.
+        </p>
+
+        <ProjectMediaGrid
+          layout="grid"
+          uniform={true}
+          media={[
+            {
+              src: "/Homelab/Home_Lab_Fan_Header_2.jpg",
+              alt: "Custom fan panel for the homelab rack",
+              caption: "Custom fan panel designed for directed airflow through the compact rack. Fan auxillary PCB links to main fan control PCB via RJ45 ethernet connection (non-std use)",
+            },
+            {
+              src: "/Homelab/Home_Lab_HDD_Bay.jpg",
+              alt: "Custom HDD bay panel for the homelab rack",
+              caption: "HDD bay panel designed to mount storage drives within the NAS layer.",
+            },
+            {
+              src: "/Homelab/Home_Lab_Network_Bay.jpg",
+              alt: "Switch and ZimaBlade panel for the homelab rack",
+              caption: "Switch and ZimaBlade panel for network services and future expansion.",
+            },
+            {
+              src: "/Homelab/Home_Lab_Zima_Bay.jpg",
+              alt: "ZimaBoard panel for the main homelab server",
+              caption: "ZimaBoard panel supporting the main NAS and media server hardware.",
+            },
+          ]}
+        />
+      </ContentBlock>
+    </div>
+  </div>
+
+  <!-- =====================================================
+       03. TECHNICAL DEVELOPMENT
+       ===================================================== -->
+
+  <div slot="technical-development">
+    <div class="technical-section">
+      <ContentBlock title="Fan Control and Temperature Monitoring PCBs">
+        <p>
+          A custom PCB solution was developed to manage the cooling system for the homelab rack.
+          The fan control board is designed around two operating modes: an automatic temperature-controlled
+          mode using an STM32 microcontroller, and a manual fixed-speed mode using a 555 timer configured
+          in astable operation.
+        </p>
+
+        <p>
+          In automatic mode, the STM32 reads temperature sensor feedback and adjusts fan output based on
+          the thermal conditions inside the rack. This allows the cooling system to respond to HDD and
+          enclosure temperature changes without requiring constant manual adjustment. The board also includes
+          programming access through an ST-Link connection, allowing the STM32 firmware to be flashed and
+          debugged during development.
+        </p>
+
+        <p>
+          The manual mode provides a hardware fallback using a 555 timer PWM circuit. This allows the fans
+          to run at a fixed speed even if the microcontroller is disabled, unprogrammed, or not required for
+          a particular operating mode. This added redundancy was useful from both a design and troubleshooting
+          perspective, as it separates basic fan operation from the embedded control system.
+        </p>
+
+        <ProjectMediaGrid
+          layout="stack"
+          media={[
+            {
+              src: "/Homelab/Fan_Ctrl_Board_Render.jpg",
+              alt: "Fan control PCB render showing STM32 controller, 555 timer circuitry, fan headers, and board-to-board connectors",
+              caption: "Main fan control PCB with STM32-based automatic control, 555 timer manual mode, and fan output connections.",
+            },
+            {
+              src: "/Homelab/Fan_Aux_Board_Render.jpg",
+              alt: "Auxiliary fan and temperature monitoring PCB render",
+              caption: "Auxiliary fan and temperature monitoring PCB used to extend cooling and sensor coverage within the rack.",
+            },
+          ]}
+        />
+      </ContentBlock>
+
+      <ContentBlock title="Power Supply and SATA Power Distribution">
+        <p>
+          The rack uses a compact power supply mounted with custom standoffs, with a dedicated SATA power
+          distribution PCB mounted alongside it. The purpose of this board is to simplify internal power
+          wiring by routing supply connections from Molex Mini-Fit style connectors to individual SATA power
+          outputs for the hard drives.
+        </p>
+
+        <p>
+          Each branch from the input connectors is routed to a dedicated SATA connector, reducing loose wiring
+          inside the enclosure and making the drive power layout easier to service. This also makes the power
+          system more modular, as the board acts as a central distribution point between the power supply and
+          the storage drives.
+        </p>
+
+        <p>
+          The SATA power PCB also includes a rear-accessible wakeup switch, allowing the system to be controlled
+          from the rear panel without needing to open the enclosure. This was included to improve day-to-day
+          usability once the rack is fully assembled.
+        </p>
+
+        <ProjectMediaGrid
+          layout="stack"
+          media={[
+            {
+              src: "/Homelab/Home_Lab_Power_Supply.jpg",
+              alt: "Power supply PCB HAT trial assembly.",
+              caption: "Power supply PCB HAT trial assembly.",
+            },
+            {
+              src: "/Homelab/Home_Lab_Populated_Power_Board.jpg",
+              alt: "Power Supply PCB HAT connectors soldered and ready to install.",
+              caption: "Power Supply PCB HAT connectors soldered and ready to install.",
+            },
+          ]}
+        />
+      </ContentBlock>
+
+      <ContentBlock title="3D Printing, Enclosure Design, and Assembly">
+        <p>
+          The mechanical design was originally inspired by mklements' LabRax concept, but the final layout has
+          been altered substantially to suit my own hardware, cooling, storage, and serviceability requirements.
+          The project keeps the compact 10-inch rack concept, while adapting the internal layout around the
+          ZimaBoard, ZimaBlade, HDDs, power supply, fan system, and custom PCB assemblies.
+        </p>
+
+        <ProjectMediaGrid
+          layout="grid"
+          media={[
+            {
+              src: "/Homelab/Home_Lab_Shell.jpg",
+              alt: "10 inch rack shell",
+              caption: "10 inch rack shell.",
+            },
+          ]}
+        />
+
+        <p>
+          The enclosure components are printed in black PETG to provide better temperature resistance than PLA,
+          which is useful for a compact server rack containing hard drives, electronics, and active cooling.
+          The side panels are laser cut from acrylic, giving the enclosure a cleaner finish while still allowing
+          access and visibility into the internal layout.
+        </p>
+
+        <p>
+          This part of the project involved fitting together multiple disciplines: CAD layout, 3D printing,
+          panel design, PCB mounting, cable routing, airflow planning, and practical assembly. A major goal was
+          to keep the rack modular enough that individual boards, drives, or service nodes could be accessed
+          and modified as the system evolves.
+        </p>
+
+        <ProjectMediaGrid
+          layout="grid"
+          media={[
+            {
+              src: "/Homelab/Home_Lab_Assembly.jpg",
+              alt: "Overview of some of the components that made up the homelab system",
+              caption: "Overview of some of the components that made up the homelab system.",
+            },
+          ]}
+        />
+      </ContentBlock>
+    </div>
+  </div>
+
+  <!-- =====================================================
+       04. PROJECT OUTCOME
+       ===================================================== -->
+
+  <div slot="outcome">
+    <ContentBlock>
+      <p>
+        This project is being developed as a compact, modular homelab platform for managing personal media,
+        self-hosted services, storage, and future network tools while also serving as a practical electronics
+        and mechanical design project.
+      </p>
+
+      <ProjectMediaGrid
+        layout="stack"
+        media={[
+          {
+            src: "/Homelab/Home_Lab_Render.jpg",
+            alt: "CAD Rendering of main system",
+            caption: "CAD Rendering of major components.",
+          },
+        ]}
+      />
+    </ContentBlock>
+  </div>
+</ProjectWriteupLayout>
+
+<style>
+  /* =======================================================
+     Homelab page specific spacing
+     ======================================================= */
+
+  .feature-list,
+  .technical-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+</style>

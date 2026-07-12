@@ -1,0 +1,284 @@
+---
+/* =========================================================
+   Imports
+   ========================================================= */
+
+/*
+  Layout wraps the page with the shared site structure,
+  including your sidebar and main content area.
+*/
+import Layout from "../layouts/Layout.astro";
+
+/*
+  ProjectCard is the reusable card component used for each
+  project in the projects overview section.
+*/
+import ProjectCard from "../components/MainPageTemplating/ProjectCard.astro";
+
+/*
+  Central project data.
+
+  This file feeds both the homepage project cards
+  and the sidebar project links.
+
+  Current expected location:
+  src/data/Projects.ts
+*/
+import { projects } from "../data/Projects";
+
+/*
+  Friends website links.
+
+  To add another friend, duplicate one of the objects below
+  and update the name, description, and href.
+*/
+const friends = [
+  {
+    name: "Julian Cooper | Mechatronics Engineering",
+    description: "Insert Description Here :) (DO LATER).",
+    href: "https://jlrpcrobotics.site/",
+  },
+  {
+    name: "Zack Harvey",
+    description: "A short description of what they do or what their website contains.",
+    href: "https://zackharvey.com/",
+  },
+];
+---
+
+<Layout title="Simon Portfolio">
+
+  <!-- =====================================================
+       About Section
+       This is the landing section linked from /#about
+       ===================================================== -->
+
+  <section id="about" class="about-section">
+    <h1>Simon Finn</h1>
+
+    <p>
+      I’m a mechatronics engineering graduate interested in building practical systems 
+      that improve everyday outcomes for people, production, and industry, 
+      with an interest in water, agriculture, food manufacturing and recycling.
+    </p>
+  </section>
+
+  <!-- =====================================================
+       Projects Overview Section
+       This is the section linked from /#projects.
+       The sidebar item "Projects Overview" points here.
+       ===================================================== -->
+
+  <section id="projects" class="projects-section">
+    <h1>Projects Overview</h1>
+
+    <p>
+      A selection of engineering, embedded systems, automation, and prototype
+      development projects.
+    </p>
+
+    <!-- ===================================================
+      Project Card Grid
+
+      These cards are automatically generated from:
+      src/data/Projects.ts
+
+      To add, remove, rename, or reorder projects,
+      edit the projects array in that file.
+      =================================================== -->
+
+    <div class="project-grid">
+      {projects.map((project) => (
+        <ProjectCard
+          title={project.title}
+          description={project.description}
+          href={project.href}
+          images={project.images}
+          tags={project.tags}
+        />
+      ))}
+    </div>
+  </section>
+
+  <!-- =====================================================
+       Friends Websites Section
+       This section is nested below the projects overview.
+       ===================================================== -->
+
+  <section id="friends" class="friends-section">
+    <h1>Friends' Websites</h1>
+
+    <p>
+      Please check out my fellow friends websites also!
+    </p>
+
+    <div class="friends-grid">
+      {friends.map((friend) => (
+        <a
+          class="friend-card"
+          href={friend.href}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <div>
+            <h2>{friend.name}</h2>
+            <p>{friend.description}</p>
+          </div>
+
+          <span>Visit website →</span>
+        </a>
+      ))}
+    </div>
+  </section>
+
+</Layout>
+
+<style>
+  /* =======================================================
+     Shared section spacing
+     ======================================================= */
+
+  section {
+    padding-bottom: 4rem;
+  }
+
+  /* =======================================================
+     About section
+     ======================================================= */
+
+  .about-section {
+    min-height: auto;
+    padding-bottom: 1.5rem;
+  }
+
+  .about-section p {
+    max-width: 780px;
+    font-size: 1.15rem;
+    color: var(--text-muted);
+  }
+
+  /* =======================================================
+     Projects overview section
+     ======================================================= */
+
+  .projects-section {
+    padding-top: 1rem;
+  }
+
+  .projects-section > p {
+    max-width: 760px;
+  }
+
+  /* =======================================================
+     Friends websites section
+     ======================================================= */
+
+  .friends-section {
+    padding-top: 1rem;
+  }
+
+  .friends-section > p {
+    max-width: 760px;
+  }
+
+  .friends-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    max-width: 1100px;
+    margin-top: 1.5rem;
+  }
+
+  .friend-card {
+    display: flex;
+    justify-content: space-between;
+    gap: 1.5rem;
+    padding: 1.5rem;
+    border: 1px solid var(--border-subtle);
+    border-radius: 1rem;
+    background: var(--surface-card);
+    color: inherit;
+    text-decoration: none;
+    transition:
+      transform 0.2s ease,
+      border-color 0.2s ease,
+      background 0.2s ease;
+  }
+
+  .friend-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--accent);
+  }
+
+  .friend-card h2 {
+    margin: 0 0 0.5rem;
+    color: var(--text-main);
+    font-size: 1.3rem;
+  }
+
+  .friend-card p {
+    margin: 0;
+    max-width: 700px;
+  }
+
+  .friend-card span {
+    flex-shrink: 0;
+    align-self: center;
+    color: var(--accent);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  /* =======================================================
+     Headings
+     ======================================================= */
+
+  h1 {
+    margin-top: 0;
+    margin-bottom: 0.75rem;
+    font-size: 2.5rem;
+    color: var(--text-main);
+  }
+
+  .about-section h1,
+  .projects-section h1,
+  .friends-section h1 {
+    color: var(--accent);
+  }
+
+  /* =======================================================
+     Paragraph text
+     ======================================================= */
+
+  p {
+    max-width: 700px;
+    line-height: 1.7;
+    color: var(--text-muted);
+  }
+
+  /* =======================================================
+     Project card layout
+     ======================================================= */
+
+  .project-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    max-width: 1100px;
+    margin-top: 1.5rem;
+  }
+
+  /* =======================================================
+     Mobile layout
+     ======================================================= */
+
+  @media (max-width: 700px) {
+    .friend-card {
+      flex-direction: column;
+    }
+
+    .friend-card span {
+      align-self: flex-start;
+    }
+  }
+</style>

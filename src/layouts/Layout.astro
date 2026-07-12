@@ -1,0 +1,327 @@
+---
+import FileTreeSidebar from "../components/MainPageTemplating/FileTreeSidebar.astro";
+
+const { title = "Simon Portfolio" } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content="Simon portfolio website" />
+    <meta name="viewport" content="width=device-width" />
+    <title>{title}</title>
+  </head>
+
+  <body class="theme-timeless-elegance">
+    <div class="site-shell">
+      <div class="print-hidden">
+        <FileTreeSidebar />
+      </div>
+
+      <main class="page-content">
+        <slot />
+      </main>
+    </div>
+  </body>
+</html>
+
+<style>
+  :global(body.theme-retro-navy) {
+    --bg-main: #0b1020;
+    --bg-panel: #11182b;
+    --bg-card: #18213a;
+    --bg-card-hover: #202a46;
+    --border: #2c3a5c;
+    --text-main: #f5f0df;
+    --text-muted: #b8bfd6;
+    --accent: #ffbf69;
+    --accent-soft: rgba(255, 191, 105, 0.14);
+    --accent-glow: rgba(255, 191, 105, 0.28);
+  }
+
+  :global(body.theme-ibm-blue) {
+    --bg-main: #07111f;
+    --bg-panel: #0d1b2e;
+    --bg-card: #13263d;
+    --bg-card-hover: #1a314f;
+    --border: #29415f;
+
+    --text-main: #e8f1ff;
+    --text-muted: #9eb3cc;
+
+    --accent: #7cc7ff;
+    --accent-soft: rgba(124, 199, 255, 0.14);
+    --accent-glow: rgba(124, 199, 255, 0.25);
+
+    --accent-2: #ffb86b;
+    --accent-2-soft: rgba(255, 184, 107, 0.14);
+    --accent-2-glow: rgba(255, 184, 107, 0.25);
+  }
+
+  :global(body.theme-cool-blues) {
+    --bg-main: #1b2631;
+    --bg-panel: #24323a;
+    --bg-card: #2b3b44;
+    --bg-card-hover: #344852;
+    --border: #3f4e4f;
+
+    --text-main: #f0f4f8;
+    --text-muted: #d9e4e0;
+
+    --accent: #a5c8d6;
+    --accent-soft: rgba(165, 200, 214, 0.14);
+    --accent-glow: rgba(165, 200, 214, 0.26);
+
+    --accent-2: #d9e4e0;
+    --accent-2-soft: rgba(217, 228, 224, 0.14);
+    --accent-2-glow: rgba(217, 228, 224, 0.22);
+  }
+
+  :global(body.theme-retro-terminal) {
+    --bg-main: #0b0f0e;
+    --bg-panel: #121917;
+    --bg-card: #18211f;
+    --bg-card-hover: #20302c;
+    --border: #2e3a36;
+    --text-main: #e6f1ed;
+    --text-muted: #9fb3aa;
+    --accent: #6ee7b7;
+    --accent-soft: rgba(110, 231, 183, 0.14);
+    --accent-glow: rgba(110, 231, 183, 0.26);
+  }
+
+  :global(body.theme-timeless-elegance) {
+    --bg-main: #2e4052;
+    --bg-panel: #263747;
+    --bg-card: #384c5f;
+    --bg-card-hover: #435a70;
+    --border: #5b6f7d;
+
+    --text-main: #f0e5d8;
+    --text-muted: #d8cbbd;
+
+    --accent: #d9bf77;
+    --accent-soft: rgba(217, 191, 119, 0.15);
+    --accent-glow: rgba(217, 191, 119, 0.26);
+
+    --accent-2: #c84b31;
+    --accent-2-soft: rgba(200, 75, 49, 0.15);
+    --accent-2-glow: rgba(200, 75, 49, 0.25);
+  }
+
+  :global(body.theme-engineering-paper) {
+    --bg-main: #f5f0df;
+    --bg-panel: #e4dcc4;
+    --bg-card: #fff8e7;
+    --bg-card-hover: #f4ead2;
+    --border: #b8aa8c;
+    --text-main: #252018;
+    --text-muted: #675f50;
+    --accent: #2f5d62;
+    --accent-soft: rgba(47, 93, 98, 0.13);
+    --accent-glow: rgba(47, 93, 98, 0.22);
+  }
+
+  :global(body.theme-warm-industrial) {
+    --bg-main: #17130f;
+    --bg-panel: #211a14;
+    --bg-card: #2b2118;
+    --bg-card-hover: #372a1d;
+    --border: #4a3827;
+    --text-main: #f4eadc;
+    --text-muted: #c4ae95;
+    --accent: #f4a261;
+    --accent-soft: rgba(244, 162, 97, 0.14);
+    --accent-glow: rgba(244, 162, 97, 0.28);
+  }
+
+  :global(body.theme-retro-macintosh) {
+    --bg-main: #f3efe3;
+    --bg-panel: #ded6c3;
+    --bg-card: #fff8e7;
+    --border: #b8aa92;
+    --text-main: #252525;
+    --text-muted: #5f5a50;
+    --accent: #3d5a80;
+    --accent-soft: rgba(61, 90, 128, 0.14);
+    --accent-glow: rgba(61, 90, 128, 0.24);
+  }
+
+  :global(body.theme-crt-amber) {
+    --bg-main: #100c08;
+    --bg-panel: #1b140c;
+    --bg-card: #241a10;
+    --bg-card-hover: #302315;
+    --border: #4a351d;
+    --text-main: #ffe8b5;
+    --text-muted: #c9a978;
+    --accent: #ffb000;
+    --accent-soft: rgba(255, 176, 0, 0.14);
+    --accent-glow: rgba(255, 176, 0, 0.3);
+  }
+
+  :global(body.theme-field-notebook) {
+    --bg-main: #10140f;
+    --bg-panel: #182016;
+    --bg-card: #20291c;
+    --bg-card-hover: #293424;
+    --border: #3e4d34;
+    --text-main: #f0ead6;
+    --text-muted: #b7b08f;
+    --accent: #a7c957;
+    --accent-soft: rgba(167, 201, 87, 0.14);
+    --accent-glow: rgba(167, 201, 87, 0.25);
+  }
+
+  :global(body.theme-graphite-orange) {
+    --bg-main: #111111;
+    --bg-panel: #191919;
+    --bg-card: #222222;
+    --bg-card-hover: #2b2b2b;
+    --border: #3a3a3a;
+    --text-main: #f2eee8;
+    --text-muted: #b8afa4;
+    --accent: #ff8c42;
+    --accent-soft: rgba(255, 140, 66, 0.14);
+    --accent-glow: rgba(255, 140, 66, 0.28);
+  }
+
+  :global(*) {
+    box-sizing: border-box;
+  }
+
+  :global(html) {
+    scroll-behavior: smooth;
+  }
+
+  :global(body) {
+    margin: 0;
+    background: var(--bg-main);
+    color: var(--text-main);
+    font-family: Arial, Helvetica, sans-serif;
+  }
+
+  .site-shell {
+    display: grid;
+    grid-template-columns: 270px minmax(0, 1fr);
+    min-height: 100vh;
+  }
+
+  .page-content {
+    min-width: 0;
+    padding: 3rem;
+    overflow-x: hidden;
+  }
+
+  @media (max-width: 800px) {
+    .site-shell {
+      grid-template-columns: 1fr;
+    }
+
+    .page-content {
+      padding: 1.5rem;
+    }
+  }
+
+  /* =======================================================
+     Print and PDF export styles
+     ======================================================= */
+
+  @media print {
+    @page {
+      size: A4;
+      margin: 14mm;
+    }
+
+    :global(html),
+    :global(body) {
+      background: white !important;
+      color: black !important;
+      overflow: visible !important;
+      print-color-adjust: exact;
+      -webkit-print-color-adjust: exact;
+    }
+
+    .print-hidden {
+      display: none !important;
+    }
+
+    .site-shell {
+      display: block !important;
+      min-height: auto !important;
+    }
+
+    .page-content {
+      width: 100% !important;
+      max-width: none !important;
+      padding: 0 !important;
+      overflow: visible !important;
+    }
+
+    :global(main),
+    :global(article),
+    :global(section),
+    :global(.project-page) {
+      overflow: visible !important;
+    }
+
+    :global(img),
+    :global(video),
+    :global(canvas),
+    :global(svg) {
+      display: block;
+      max-width: 100% !important;
+      height: auto !important;
+    }
+
+    :global(figure),
+    :global(.grid-image),
+    :global(.media-card),
+    :global(.media-item),
+    :global(.project-media),
+    :global(.project-image-grid > *),
+    :global(.project-media-grid > *),
+    :global(.code-summary),
+    :global(.skills-grid > div) {
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    :global(.project-image-grid),
+    :global(.project-media-grid),
+    :global(.skills-grid) {
+      display: grid !important;
+      grid-template-columns: 1fr !important;
+      gap: 1rem !important;
+      overflow: visible !important;
+    }
+
+    :global(figure),
+    :global(.grid-image),
+    :global(.media-card),
+    :global(.media-item) {
+      margin-bottom: 1.25rem;
+    }
+
+    :global(figure img),
+    :global(.grid-image img),
+    :global(.media-card img),
+    :global(.media-item img) {
+      max-height: 230mm;
+      object-fit: contain;
+    }
+
+    :global(h1),
+    :global(h2),
+    :global(h3) {
+      break-after: avoid;
+      page-break-after: avoid;
+    }
+
+    :global(p) {
+      orphans: 3;
+      widows: 3;
+    }
+  }
+</style>

@@ -1,0 +1,373 @@
+---
+/* =========================================================
+   Projects importer
+   ========================================================= */
+
+/*
+  Because this file is inside:
+  src/components/MainPageTemplating/FileTreeSidebar.astro
+
+  and the central project list is inside:
+  src/data/Projects.ts
+
+  the correct relative import is:
+  ../../data/Projects
+
+  Do not use the full Windows path here.
+*/
+import { projects } from "../../data/Projects";
+
+/* =========================================================
+   URL and active link setup
+   ========================================================= */
+
+/*
+  Astro.url.pathname gives the current page path.
+
+  Examples:
+  "/"
+  "/projects/PP_Reverse_Vending_Machine/"
+*/
+const rawPath = Astro.url.pathname;
+
+/*
+  Remove trailing slashes so active checks work consistently.
+
+  Example:
+  "/projects/PP_Reverse_Vending_Machine/"
+  becomes:
+  "/projects/PP_Reverse_Vending_Machine"
+*/
+const normalisePath = (path: string) =>
+  path.endsWith("/") && path !== "/" ? path.slice(0, -1) : path;
+
+const currentPath = normalisePath(rawPath);
+---
+
+<!-- =======================================================
+     Sidebar wrapper
+     ======================================================= -->
+
+<aside class="file-tree-sidebar">
+  <a class="sidebar-brand" href="/">
+    <span class="brand-name">Simon Finn</span>
+    <span class="brand-subtitle">Mechatronics Portfolio</span>
+  </a>
+
+  <nav aria-label="Portfolio navigation">
+    <ul class="tree">
+
+      <!-- =================================================
+           About link
+           Links to the about section on the homepage.
+           The gear is controlled by the hash script below.
+           ================================================= -->
+
+      <li>
+        <a 
+          href="/#about" 
+          class:list={["tree-link", { active: currentPath === "/" }]}
+          data-section-link="about"
+        >
+          <span class="tree-line">├──</span>
+          <span class="link-label">About Me</span>
+          <span class="active-gear" aria-hidden="true">⚙</span>
+        </a>
+      </li>
+
+      <!-- =================================================
+          Projects overview
+          This links to the project card section on the homepage.
+          The project links underneath are generated from
+          src/data/Projects.ts.
+           ================================================= -->
+
+      <li>
+        <a 
+          href="/#projects"
+          class="tree-link"
+          data-section-link="projects"
+        >
+          <span class="tree-line">├──</span>
+          <span class="link-label">Projects Overview</span>
+          <span class="active-gear" aria-hidden="true">⚙</span>
+        </a>
+
+        <!-- ===============================================
+            Nested project links
+            These are automatically generated from:
+            src/data/Projects.ts
+
+            To add, remove, rename, or reorder projects,
+            edit the projects array in that file.
+
+            Each project needs at least:
+            title or sidebarLabel
+            href
+             =============================================== -->
+
+        <ul class="tree nested">
+          {projects.map((project, index) => {
+            const isLastProject = index === projects.length - 1;
+            const isActiveProject = currentPath === normalisePath(project.href);
+
+            return (
+              <li>
+                <a 
+                  href={project.href}
+                  class:list={["tree-link", { active: isActiveProject }]}
+                >
+                  <span class="tree-line">
+                    {isLastProject ? "└──" : "├──"}
+                  </span>
+
+                  <span class="link-label">
+                    {project.sidebarLabel ?? project.title}
+                  </span>
+
+                  <span class="active-gear" aria-hidden="true">⚙</span>
+                </a>
+              </li>
+            );
+          })}
+        </ul>
+      </li>
+
+      <!-- =================================================
+           Friends websites link
+           Links to the friends section on the homepage.
+           ================================================= -->
+
+      <li>
+        <a
+          href="/#friends"
+          class="tree-link"
+          data-section-link="friends"
+        >
+          <span class="tree-line">└──</span>
+          <span class="link-label">Friends' Websites</span>
+          <span class="active-gear" aria-hidden="true">⚙</span>
+        </a>
+      </li>
+    </ul>
+  </nav>
+</aside>
+
+<!-- =======================================================
+     Homepage section highlighting
+     This handles /#about, /#projects, and /#friends.
+
+     Astro can detect normal page paths, but browser hash links
+     like #about, #projects, and #friends need this small script.
+     ======================================================= -->
+
+<script>
+  function updateHomeSectionHighlight() {
+    const sectionLinks = document.querySelectorAll("[data-section-link]");
+
+    /*
+      Only use hash-based highlighting on the homepage.
+      On project pages, the Astro path checks handle the active state.
+    */
+    if (window.location.pathname !== "/") {
+      sectionLinks.forEach((link) => link.classList.remove("active"));
+      return;
+    }
+
+    /*
+      If there is no hash, treat the homepage as the about section.
+    */
+    const currentHash = window.location.hash || "#about";
+
+    sectionLinks.forEach((link) => {
+      const section = link.getAttribute("data-section-link");
+      const shouldBeActive = currentHash === `#${section}`;
+
+      link.classList.toggle("active", shouldBeActive);
+    });
+  }
+
+  updateHomeSectionHighlight();
+
+  window.addEventListener("hashchange", updateHomeSectionHighlight);
+</script>
+
+<style>
+  /* =======================================================
+     Sidebar layout
+     ======================================================= */
+
+  .file-tree-sidebar {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    width: 270px;
+    max-width: 270px;
+    box-sizing: border-box;
+
+    padding: 0.55rem 0.45rem;
+    border-right: 1px solid var(--border);
+    background: var(--bg-panel);
+    color: var(--text-main);
+    font-family: Consolas, "Courier New", monospace;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    z-index: 10;
+  }
+
+  /* =======================================================
+     Sidebar brand
+     ======================================================= */
+
+  .sidebar-brand {
+    display: block;
+    margin-bottom: 1.45rem;
+    padding: 0.55rem 0.6rem 0.7rem;
+    border-left: 3px solid var(--accent);
+    border-radius: 0.35rem;
+    background: rgba(255, 255, 255, 0.035);
+    text-decoration: none;
+  }
+
+  .sidebar-brand:hover {
+    background: var(--accent-soft);
+  }
+
+  .brand-name {
+    display: block;
+    color: var(--accent);
+    font-size: 1.2rem;
+    font-weight: 800;
+    letter-spacing: 0.03em;
+    line-height: 1.1;
+  }
+
+  .brand-subtitle {
+    display: block;
+    margin-top: 0.3rem;
+    color: var(--text-muted);
+    font-size: 0.74rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    line-height: 1.35;
+    text-transform: uppercase;
+  }
+
+  /* =======================================================
+     File tree structure
+     ======================================================= */
+
+  .tree {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .nested {
+    margin-left: 0.95rem;
+    padding-left: 0.35rem;
+    border-left: 1px solid var(--border);
+  }
+
+  /* =======================================================
+     Link row styling
+     ======================================================= */
+
+  .tree a {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.35rem 0.45rem;
+    color: var(--text-muted);
+    text-decoration: none;
+    border-radius: 0.4rem;
+    font-size: 0.9rem;
+    cursor: pointer;
+  }
+
+  /* =======================================================
+     Top-level sidebar links
+     Moves only About Me, Projects Overview, and Friends
+     slightly left. Nested project links are not affected.
+     ======================================================= */
+
+  nav > .tree > li > .tree-link {
+    padding-left: 0.1rem;
+  }
+
+  .tree a:hover {
+    background: var(--accent-soft);
+    color: var(--text-main);
+  }
+
+  /* =======================================================
+     Active link styling
+     ======================================================= */
+
+  .tree a.active {
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+
+  .tree a.active .tree-line {
+    color: var(--accent);
+  }
+
+  /* =======================================================
+     Tree symbols
+     ======================================================= */
+
+  .tree-line {
+    color: var(--border);
+  }
+
+  .link-label {
+    white-space: nowrap;
+  }
+
+  /* =======================================================
+     Active gear animation
+     The gear stays on the right side of the active row.
+     ======================================================= */
+
+  .active-gear {
+    margin-left: auto;
+    opacity: 0;
+    font-size: 1.35rem;
+    line-height: 1;
+    display: inline-block;
+    color: var(--accent);
+    transform-origin: center;
+  }
+
+  .tree a.active .active-gear {
+    opacity: 1;
+    animation: gear-spin 2s linear infinite;
+  }
+
+  @keyframes gear-spin {
+    from {
+      transform: rotate(0deg);
+    }
+
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* =======================================================
+     Mobile layout
+     ======================================================= */
+
+  @media (max-width: 800px) {
+    .file-tree-sidebar {
+      position: relative;
+      width: 100%;
+      height: auto;
+      border-right: none;
+      border-bottom: 1px solid var(--border);
+    }
+  }
+</style>

@@ -1,0 +1,26 @@
+---
+/* =========================================================
+   Reusable content block
+
+   Used for repeated project subsections such as:
+   - Key feature blocks
+   - Technical development blocks
+   - Overview blocks
+   - Outcome blocks
+
+   The visual styling comes from ProjectWriteupLayout.astro
+   through the global .content-block class.
+   ========================================================= */
+
+interface Props {
+  title?: string;
+}
+
+const { title } = Astro.props;
+---
+
+<section class="content-block">
+  {title && <h3>{title}</h3>}
+
+  <slot />
+</section>

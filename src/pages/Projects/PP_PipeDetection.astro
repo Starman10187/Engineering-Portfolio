@@ -1,0 +1,545 @@
+---
+import ProjectWriteupLayout from "../../components/ProjectPageTemplating/ProjectWriteupLayout.astro";
+import ContentBlock from "../../components/ProjectPageTemplating/ContentBlock.astro";
+import ProjectMediaGrid from "../../components/ProjectPageTemplating/ProjectMediaGrid.astro";
+---
+
+<ProjectWriteupLayout
+  title="Sewer Serpent Leak Detection System"
+  intro="An industry placement project focused on documenting and improving a water leak detection system, combining sensor evaluation, custom PCB design, mechanical prototyping, field testing, and engineering recommendations."
+>
+  <!-- =====================================================
+       01. PROJECT OVERVIEW
+       ===================================================== -->
+
+  <Fragment slot="overview">
+    <ContentBlock title="Project Overview">
+      <p>
+        This project was completed during an industry placement at Deakin
+        University and focused on the Sewer Serpent leak detection system, a
+        field-deployable system designed to locate compromised PVC stormwater and
+        sewer pipe sections.
+      </p>
+
+      <p>
+        The broader project was successful in demonstrating leak detection, but
+        one important limitation remained in the way the system measured probe
+        distance. The existing design used a rotary encoder inside the reel hub,
+        which meant it was measuring reel rotation rather than directly measuring
+        how far the pushrod had travelled through the pipe.
+      </p>
+
+      <p>
+        My work focused on investigating, prototyping, and documenting improved
+        distance measurement approaches. This included optical flow testing,
+        custom PCB design, encoder signal conversion, follower-wheel prototyping,
+        field test support, and future engineering recommendations. Additionally all documentation, recommendations
+        and the design of a controlled testing site were my responsibilities.
+      </p>
+    </ContentBlock>
+
+    <ProjectMediaGrid
+      layout="stack"
+      media={[
+        {
+          src: "/Leak_Detector/Outdoor_Test_Rig.jpg",
+          alt: "Outdoor Sewer Serpent pipe test rig with PVC pipe, soil boxes, grounding rods, and surrounding field setup",
+          caption: "Outdoor pipe test rig used to validate the leak detection workflow under more realistic test conditions. Featuring 3 leaks (situated within buckets) of 1mm, 2mm and 5mm diameter",
+        },
+      ]}
+    />
+
+    <ContentBlock title="Project Purpose">
+      <p>
+        The key issue was that reel rotation does not always represent actual
+        pushrod movement. The hose can be fed out while the reel remains
+        partially stationary, slack can form, and the effective diameter of the
+        wound pushrod changes as the reel fills or empties.
+      </p>
+
+      <p>
+        For a leak detection system, this distance error matters because the
+        operator uses the displayed probe position to locate where the pipe fault
+        is likely to be. Improving the position measurement would therefore make
+        the system more useful in real field conditions.
+      </p>
+
+      <p>
+        The aim was not to redesign the entire product from scratch, but to
+        investigate direct pushrod measurement approaches while keeping the
+        existing system largely intact as a fallback.
+      </p>
+    </ContentBlock>
+  </Fragment>
+
+  <!-- =====================================================
+       02. KEY FEATURES
+       ===================================================== -->
+
+  <Fragment slot="key-features">
+    <ContentBlock title="Test Rig and System Context">
+      <p>
+        A PVC pipe test rig was assembled to simulate the field setup used by the
+        Sewer Serpent system. The rig included pipe sections, soil boxes,
+        grounding rods, water filling, and a cable reel setup to support repeated
+        testing.
+      </p>
+
+      <p>
+        This gave the team a controlled way to test the full workflow, including
+        pipe flooding, grounding, probe movement, scan setup, signal integrity,
+        leak detection, and scan review. The system was housed on-site at the university,
+        requiring the system to remain above ground for easy removal. This led to a design wherein each 
+        container housed a leak and a connecting grounding rod.
+      </p>
+
+      <p>
+        The field setup also highlighted practical constraints that are easy to
+        miss during bench testing, such as wet environments, cable routing,
+        operator handling, reel movement, grounding quality, and physical access
+        around the test site.
+      </p>
+    </ContentBlock>
+
+    <ProjectMediaGrid
+      layout="stack"
+      
+      media={[
+        {
+          src: "/Leak_Detector/Sewer_Serpent_Test_Rig_Deakin_A.png",
+          alt: "CAD render of the Sewer Serpent PVC pipe test rig with multiple soil boxes",
+          caption: "CAD concept of the pipe test rig, including pipe sections and soil boxes.",
+        },
+        {
+          src: "/Leak_Detector/Drawing_Sketch_Rough.jpg",
+          alt: "Dimensioned drawing of the Sewer Serpent test rig layout",
+          caption: "Rough layout drawing used to plan the test rig dimensions and spacing.",
+        },
+
+        {
+          src: "/Leak_Detector/Feeding_In_Probe.JPG",
+          alt: "Sewer Serpent field reels and pushrod equipment set up outdoors",
+          caption: "Feeding the Electrode Probe through the entry of the test rig.",
+        }, 
+      ]}
+    />
+
+    <ContentBlock title="Custom Encoder Interface PCB">
+      <p>
+        A custom intermediary PCB was designed to support alternative distance
+        measurement approaches. The board used a SparkFun Pro Micro RP2040 and
+        supporting circuitry to output two encoder-style logic channels to the
+        existing Serpent Control Unit.
+      </p>
+
+      <p>
+        The PCB included MOSFET switching stages, visual pulse indicators, power
+        input options, test points, and connector breakouts. The goal was to
+        convert data from a new measurement device into the kind of quadrature
+        pulse signals that the control unit already expected.
+      </p>
+
+      <p>
+        Although the PCB was originally designed around the optical flow approach,
+        it became a useful flexible platform because the same board could also be
+        reconfigured for a follower-wheel encoder solution.
+      </p>
+    </ContentBlock>
+
+    <ProjectMediaGrid
+      layout="masonry"
+      media={[
+        {
+          src: "/Leak_Detector/Encoder_Lineups.jpg",
+          alt: "Two assembled Sewer Serpent encoder interface PCBs with RP2040 modules fitted",
+          caption: "Assembled interface PCBs with RP2040 modules fitted.",
+        },
+        {
+          src: "/Leak_Detector/Leak_Detector_PCB.JPG",
+          alt: "Front render of the Sewer Serpent encoder interface PCB",
+          caption: "PCB render showing the RP2040 footprint, MOSFET stages, connectors, LEDs, and test points.",
+        },
+        {
+          src: "/Leak_Detector/Leak Detector_PCB_Rear.JPG",
+          alt: "Rear side of the custom Sewer Serpent PCB showing project text and later wiring modifications",
+          caption: "Rear side of the PCB showing project labelling and later wiring modifications.",
+        },
+      ]}
+      />
+
+      <ProjectMediaGrid
+      layout="stack"
+      media={[
+        {
+          src: "/Leak_Detector/Schematic.JPG",
+          alt: "Schematic for the custom Sewer Serpent encoder interface PCB",
+          caption: "Schematic showing power input, RP2040 connections, MOSFET outputs, and pulse indicator circuitry.",
+        },
+      ]}
+    />
+
+    <ContentBlock title="Follower-Wheel Encoder Prototype">
+      <p>
+        After optical flow testing showed reliability issues at realistic feed
+        speeds, the project shifted toward a mechanical follower-wheel encoder.
+        This approach measured pushrod movement using a wheel pressed against
+        the hose surface.
+      </p>
+
+      <p>
+        The prototype used guide rollers and an adjustable clamping mechanism to
+        control contact with the hose. This produced more promising distance
+        readings than the optical flow approach, especially after calibration.
+      </p>
+
+      <p>
+        The remaining challenge was mechanical repeatability. Too little clamping
+        force allowed slip, while too much clamping force increased drag and
+        could still produce inconsistent readings. The prototype showed that the
+        concept had potential, but the contact mechanism needed further design
+        refinement.
+      </p>
+    </ContentBlock>
+
+    <ProjectMediaGrid
+      layout="grid"
+      uniform={true}
+      media={[
+        {
+          src: "/Leak_Detector/Orange_Reel_Encoder_Clamping.jpg",
+          alt: "Follower wheel encoder prototype clamped around an orange pushrod",
+          caption: "Follower-wheel prototype using guide rollers and an adjustable clamping leadscrew.",
+        },
+        {
+          src: "/Leak_Detector/Encoder_Enclosure_Follower_Wheel.jpg",
+          alt: "Follower wheel encoder prototype installed inside a black enclosure",
+          caption: "Prototype assembly showing the encoder module, wiring, and roller mechanism inside the enclosure.",
+        },
+      ]}
+    />
+  </Fragment>
+
+  <!-- =====================================================
+       03. TECHNICAL DEVELOPMENT
+       ===================================================== -->
+
+  <Fragment slot="technical-development">
+    <ContentBlock title="Optical Flow Investigation">
+      <p>
+        The first direct measurement approach investigated was optical flow
+        sensing. This was appealing because it offered a non-contact way to track
+        the movement of the hose surface, similar to how a computer mouse tracks
+        movement across a desk.
+      </p>
+
+      <p>
+        A SparkFun PAA5160E1 optical tracking sensor was evaluated with an RP2040
+        microcontroller. The sensor was intended to sit close to the hose, track
+        the surface movement, and output distance information that could then be
+        converted into encoder-style pulses for the control unit.
+      </p>
+
+      <p>
+        In controlled testing, the optical flow approach showed promise at slow
+        feed rates. However, it became unreliable at more realistic operator feed
+        speeds, which meant it was not suitable as the final measurement approach
+        within the placement timeframe.
+      </p>
+
+      <div class="result-summary">
+        <p class="result-summary-title">Optical flow result</p>
+        <p>
+          The system achieved low error at slow movement, but the error increased
+          too much at practical pushrod feed speeds. This made optical flow a
+          useful investigation, but not the preferred final direction.
+        </p>
+
+        <ProjectMediaGrid
+      layout="stack"
+      media={[
+        {
+          src: "/Leak_Detector/Optical_Flow_Errors.JPG",
+          alt: "Follower wheel encoder prototype clamped around an orange pushrod",
+          caption: "As tracking speeds increase, the optical flow begins to skip/lag behind on readings, this was tested over 15.1m, the system was intended to be used up to 60m where 5% error results in 3m error, ultimately this was too high error to prove feasible within the research timeframe.",
+        },
+    
+      ]}
+       />
+
+      </div>
+    </ContentBlock>
+
+    <ContentBlock title="Encoder Signal Conversion">
+      <p>
+        The existing control unit expected encoder-style signals over two
+        channels. To avoid redesigning the control unit, the measurement
+        interface needed to convert alternative sensor data into a familiar
+        quadrature-style pulse format.
+      </p>
+
+      <p>
+        The PCB used the RP2040 as the processing stage and MOSFET output
+        circuitry to safely pull the control unit inputs low. This allowed the
+        new measurement system to behave like an external encoder from the point
+        of view of the existing hardware.
+      </p>
+
+      <p>
+        This approach kept the modification relatively modular. If one sensing
+        method failed, the same board could be reused for another method, such as
+        a mechanical encoder connected to a follower wheel.
+      </p>
+
+      <div class="code-summary">
+        <p class="code-summary-title">Conceptual signal flow</p>
+
+        <pre class="code-highlight"><code>{`Pushrod movement
+  -> sensor or encoder measurement
+  -> RP2040 processing
+  -> channel A and channel B pulse generation
+  -> MOSFET output stage
+  -> Serpent Control Unit encoder inputs`}</code></pre>
+      </div>
+    </ContentBlock>
+
+    <ContentBlock title="Follower-Wheel Testing">
+      <p>
+        The follower-wheel prototype was tested by moving the pushrod over known
+        distances and comparing the measured value against the expected travel
+        distance. This helped evaluate how clamping force, wheel diameter, and
+        slippage affected accuracy.
+      </p>
+
+      <p>
+        The testing showed that a calibrated wheel-based system could produce
+        strong readings, but only when the contact between the wheel and hose was
+        consistent. The prototype was therefore promising electrically and
+        conceptually, but the mechanical contact design was still the limiting
+        factor.
+      </p>
+
+      <p>
+        This was a useful outcome because it narrowed the future development path.
+        Rather than continuing with optical flow, the more practical next step
+        would be a mechanically improved follower or belt-contact encoder system.
+      </p>
+
+      <div class="result-summary">
+        <p class="result-summary-title">Follower-wheel result</p>
+        <p>
+          The follower-wheel approach was the more promising direction, but the
+          prototype still suffered from slip and clamping sensitivity. A future
+          version would need better contact area, grippier materials, or a
+          belt-contact mechanism.
+        </p>
+      </div>
+    </ContentBlock>
+
+    <ContentBlock title="Operating Procedure and Field Testing">
+      <p>
+        Alongside the measurement work, the team developed a Standard Operating
+        Procedure for site testing. This documented the required equipment, setup
+        process, safety considerations, operating procedure, troubleshooting
+        steps, and records needed for repeatable testing.
+      </p>
+
+      <p>
+        The procedure included positioning the reel and control unit, placing
+        grounding rods, flooding the pipe, checking earth and pipe signal
+        integrity, zeroing the probe position, feeding the probe through the pipe,
+        and reviewing detected leaks on the control unit.
+      </p>
+
+      <p>
+        This documentation was important because repeatability was a major part
+        of evaluating the system. Poor grounding, inconsistent feed rate, wet
+        conditions, or cable handling could all affect the quality of the test
+        result.
+      </p>
+      
+      <ProjectMediaGrid
+      layout="stack"
+      media={[
+        {
+          src: "/Leak_Detector/Leak_Detector_Layout.JPG",
+          alt: "Follower wheel encoder prototype clamped around an orange pushrod",
+          caption: "As tracking speeds increase, the optical flow begins to skip/lag behind on readings, this was tested over 15.1m, the system was intended to be used up to 60m where 5% error results in 3m error, ultimately this was too high error to prove feasible within the research timeframe.",
+        },
+    
+      ]}
+       />
+    </ContentBlock>
+  </Fragment>
+
+  <!-- =====================================================
+       04. PROJECT OUTCOME
+       ===================================================== -->
+
+  <Fragment slot="outcome">
+    <ContentBlock title="Outcome">
+      <p>
+        The broader Sewer Serpent project was successful in demonstrating leak
+        detection capability, but my specific measurement improvement work
+        remained an open engineering challenge by the end of the placement.
+      </p>
+
+      <p>
+        The optical flow approach was a worthwhile proof of concept, but it was
+        not reliable enough at realistic pushrod feed speeds. The follower-wheel
+        encoder approach was more promising and produced encouraging readings
+        after calibration, but the prototype still required further mechanical
+        refinement to prevent slip.
+      </p>
+
+      <p>
+        The strongest outcomes from my work were the custom encoder interface
+        PCB, the investigation into direct pushrod measurement, the follower-wheel
+        prototype, and the engineering recommendations that clarified the next
+        steps for future development.
+      </p>
+    </ContentBlock>
+
+    <ContentBlock title="Recommended Future Work">
+      <p>
+        The most promising future direction would be a mechanically improved
+        follower encoder system. A belt-contact or belt-driven encoder mechanism
+        could increase the contact area with the hose and reduce the likelihood
+        of slip compared with a single follower wheel.
+      </p>
+
+      <p>
+        Further improvements would include testing softer or higher-friction
+        wheel materials, improving clamping consistency, sealing the electronics
+        from water and mud, improving connector strain relief, and improving
+        power reliability for field operation.
+      </p>
+
+      <div class="skills-grid">
+        <div>
+          <h3>Sensor Evaluation</h3>
+          <p>
+            Investigated optical flow sensing and follower-wheel measurement as
+            alternatives to reel-based distance estimation.
+          </p>
+        </div>
+
+        <div>
+          <h3>PCB Design</h3>
+          <p>
+            Designed a custom RP2040-based interface PCB with MOSFET outputs,
+            visual indicators, test points, and connector breakouts.
+          </p>
+        </div>
+
+        <div>
+          <h3>Mechanical Prototyping</h3>
+          <p>
+            Developed a follower-wheel prototype with guide rollers and an
+            adjustable clamping mechanism for direct pushrod tracking.
+          </p>
+        </div>
+
+        <div>
+          <h3>Field Testing</h3>
+          <p>
+            Supported test rig setup, operating procedure development,
+            troubleshooting documentation, and practical system evaluation.
+          </p>
+        </div>
+      </div>
+    </ContentBlock>
+
+    <ContentBlock title="Project Reflection">
+      <p>
+        This project was valuable because it involved real engineering
+        constraints rather than a clean classroom problem. The system had legacy
+        hardware, field handling requirements, wet operating conditions, cable
+        strain, grounding sensitivity, power limitations, and a need to preserve
+        existing functionality while testing new ideas.
+      </p>
+
+      <p>
+        Although my measurement subsystem was not fully resolved, the work still
+        progressed the project by identifying what was unlikely to work, what was
+        more promising, and what should be developed next. It also gave me
+        practical experience in designing around existing systems, validating
+        prototypes, and documenting recommendations for future engineering work.
+      </p>
+    </ContentBlock>
+  </Fragment>
+</ProjectWriteupLayout>
+
+<style>
+  .code-summary {
+    margin-top: 1.25rem;
+  }
+
+  .code-summary-title {
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+  }
+
+  .code-highlight {
+    overflow-x: auto;
+    padding: 1rem;
+    border-radius: 14px;
+    border: 1px solid var(--border-soft, rgba(255, 255, 255, 0.18));
+    background: rgba(0, 0, 0, 0.28);
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+
+  .code-highlight code {
+    font-family:
+      "Cascadia Code",
+      "Fira Code",
+      Consolas,
+      monospace;
+  }
+
+  .result-summary {
+    margin-top: 1.25rem;
+    padding: 1rem;
+    border-radius: 14px;
+    border: 1px solid var(--border-soft, rgba(255, 255, 255, 0.18));
+    background: rgba(255, 255, 255, 0.035);
+  }
+
+  .result-summary-title {
+    margin: 0 0 0.5rem;
+    font-weight: 700;
+  }
+
+  .result-summary p:last-child {
+    margin-bottom: 0;
+  }
+
+  .skills-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    margin-top: 1.25rem;
+  }
+
+  .skills-grid > div {
+    padding: 1rem;
+    border-radius: 14px;
+    border: 1px solid var(--border-soft, rgba(255, 255, 255, 0.18));
+    background: rgba(255, 255, 255, 0.035);
+  }
+
+  .skills-grid h3 {
+    margin: 0 0 0.5rem;
+    font-size: 1rem;
+  }
+
+  .skills-grid p {
+    margin: 0;
+  }
+
+  @media (max-width: 760px) {
+    .skills-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

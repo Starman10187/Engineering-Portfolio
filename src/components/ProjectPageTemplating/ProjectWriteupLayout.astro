@@ -1,0 +1,265 @@
+---
+/* =========================================================
+   Reusable project write-up layout
+
+   This component provides the shared structure for individual
+   project pages, including:
+   - Back link
+   - Project title
+   - Intro paragraph
+   - Main write-up sections
+   - Named slots for project-specific content
+   ========================================================= */
+
+import Layout from "../../layouts/Layout.astro";
+
+interface Props {
+  title: string;
+  intro: string;
+  pageTitle?: string;
+  backHref?: string;
+  backLabel?: string;
+}
+
+const {
+  title,
+  intro,
+  pageTitle = `${title} | Simon Portfolio`,
+  backHref = "/#projects",
+  backLabel = "← Back to Projects Overview",
+} = Astro.props;
+---
+
+<Layout title={pageTitle}>
+  <article class="project-page">
+    <!-- =====================================================
+         Back navigation
+         ===================================================== -->
+
+    <a class="back-link" href={backHref}>{backLabel}</a>
+
+    <!-- =====================================================
+         Page header
+         ===================================================== -->
+
+    <header class="project-hero">
+      <h1>{title}</h1>
+
+      <p class="intro">
+        {intro}
+      </p>
+    </header>
+
+    <!-- =====================================================
+         Optional showcase content
+
+         Used for project-specific visual hooks, such as:
+         - interactive demos
+         - hero images
+         - videos
+         - simulations
+         ===================================================== -->
+
+    {Astro.slots.has("showcase") && (
+      <section class="project-showcase">
+        <slot name="showcase" />
+      </section>
+    )}
+
+    <!-- =====================================================
+         Project overview
+         ===================================================== -->
+
+    <section id="project-overview" class="page-section">
+      <h2>Project Overview</h2>
+
+      <div class="section-content">
+        <slot name="overview" />
+      </div>
+    </section>
+
+    <!-- =====================================================
+         Key features
+         ===================================================== -->
+
+    <section id="key-features" class="page-section">
+      <h2>Key Features</h2>
+
+      <div class="section-content">
+        <slot name="key-features" />
+      </div>
+    </section>
+
+    <!-- =====================================================
+         Technical development
+         ===================================================== -->
+
+    <section id="technical-development" class="page-section">
+      <h2>Technical Development</h2>
+
+      <div class="section-content">
+        <slot name="technical-development" />
+      </div>
+    </section>
+
+    <!-- =====================================================
+         Project outcome
+         ===================================================== -->
+
+    <section id="project-outcome" class="page-section">
+      <h2>Project Outcome</h2>
+
+      <div class="section-content">
+        <slot name="outcome" />
+      </div>
+    </section>
+
+    <!-- =====================================================
+         Optional extra content
+
+         This unnamed/default slot gives you flexibility later
+         if one project needs an extra custom section.
+         ===================================================== -->
+
+    <slot />
+  </article>
+</Layout>
+
+<style>
+  /* =======================================================
+     Page layout
+     ======================================================= */
+
+  .project-page {
+    max-width: 900px;
+  }
+
+  .project-hero {
+    margin-bottom: 2.5rem;
+  }
+
+  .page-section {
+    margin-top: 2.5rem;
+  }
+
+  .section-content {
+    margin-top: 0.75rem;
+  }
+
+  /* =======================================================
+     Optional project showcase
+     ======================================================= */
+
+  .project-showcase {
+    margin-bottom: 2.5rem;
+  }
+
+  /* =======================================================
+     Back link takes back to landing page
+     ======================================================= */
+
+  .back-link {
+    display: inline-block;
+    margin-bottom: 1.5rem;
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  .back-link:hover {
+    text-decoration: underline;
+  }
+
+  /* =======================================================
+     Headings
+     ======================================================= */
+
+  h1 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    color: var(--accent);
+    font-size: 2.5rem;
+  }
+
+  h2 {
+    margin-top: 0;
+    margin-bottom: 0.75rem;
+    color: var(--text-main);
+  }
+
+  /* =======================================================
+     Text
+     ======================================================= */
+
+  .intro {
+    max-width: 760px;
+    font-size: 1.15rem;
+    color: var(--text-muted);
+    line-height: 1.7;
+  }
+
+  /*
+    These global selectors allow the layout to style content
+    that gets passed in through named slots.
+  */
+
+  :global(.project-page p),
+  :global(.project-page li) {
+    color: var(--text-muted);
+    line-height: 1.7;
+  }
+
+  :global(.project-page p) {
+    max-width: 780px;
+  }
+
+  :global(.project-page h3) {
+    margin-bottom: 0.4rem;
+    color: var(--accent);
+    font-size: 1.15rem;
+  }
+
+  /* =======================================================
+     Reusable write-up content blocks
+
+     Use this class inside project page slots when a subsection
+     should appear as a highlighted content block.
+     ======================================================= */
+
+  :global(.content-block) {
+    padding: 1.2rem 1.35rem;
+    border-left: 3px solid var(--accent);
+    border-radius: 0.75rem;
+    background: var(--bg-card);
+  }
+
+  /*
+    Adds spacing when two content blocks appear directly
+    after each other inside the same page section.
+  */
+
+  :global(.content-block + .content-block) {
+    margin-top: 1.0rem;
+  }
+
+  /*
+    Adds spacing when media and content blocks appear directly
+    beside each other inside the same page section.
+  */
+
+  :global(.project-media-grid + .content-block),
+  :global(.content-block + .project-media-grid) {
+    margin-top: 1.0rem;
+  }
+
+  :global(.content-block h3) {
+    margin-top: 0;
+  }
+
+  :global(.content-block p) {
+    margin: 0 0 0.9rem;
+  }
+
+  :global(.content-block p:last-child) {
+    margin-bottom: 0;
+  }
+</style>

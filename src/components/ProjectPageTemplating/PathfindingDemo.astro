@@ -1,0 +1,1272 @@
+---
+/* =========================================================
+   Interactive Pathfinding Demo
+
+   Stage 1:
+   - Static browser-based simulation
+   - Adjustable obstacle width
+   - A*, Greedy, or both
+   - Canvas rendering
+   - Results summary table
+
+   This ports the core MATLAB logic into JavaScript:
+   - 120 m x 90 m field
+   - 0.5 m grid resolution
+   - fixed obstacle centres
+   - fixed target points
+   - occupancy map
+   - danger map
+   - A* with danger penalty
+   - Greedy Best-First Search
+   ========================================================= */
+---
+
+<div class="pathfinding-demo" data-pathfinding-demo>
+  <div class="demo-note">
+    <strong>Demo controls:</strong>
+    adjust the obstacle width, choose an algorithm, and compare the resulting path length
+    and risk exposure.
+  </div>
+
+  <div class="demo-controls">
+  <label>
+    Obstacle width
+    <input
+      data-obstacle-width
+      type="number"
+      min="1"
+      max="12"
+      step="1"
+      value="1"
+    />
+  </label>
+
+  <label>
+    Algorithm
+    <select data-algorithm>
+      <option value="both" selected>Both</option>
+      <option value="astar">A*</option>
+      <option value="greedy">Greedy</option>
+    </select>
+  </label>
+
+    <label>
+      A* risk weight
+      <input
+        data-risk-weight
+        type="number"
+        min="0"
+        max="5"
+        step="0.25"
+        value="1.5"
+      />
+    </label>
+
+    <label class="checkbox-label">
+      <input data-show-risk type="checkbox" checked />
+      Show risk map
+    </label>
+
+    <button data-run-simulation type="button">
+      Run Simulation
+    </button>
+  </div>
+
+  <div class="canvas-shell">
+  <div class="canvas-title">
+    Simulated field output
+  </div>
+
+  <canvas
+    data-pathfinding-canvas
+    aria-label="Interactive pathfinding simulation canvas"
+  ></canvas>
+</div>
+
+  <div class="demo-legend">
+    <span><span class="legend-dot start"></span> Start</span>
+    <span><span class="legend-dot target"></span> Targets</span>
+    <span><span class="legend-dot obstacle"></span> Obstacles</span>
+    <span><span class="legend-line astar"></span> A*</span>
+    <span><span class="legend-line greedy"></span> Greedy</span>
+  </div>
+
+  <div class="demo-results" data-results>
+    Run the simulation to generate path results.
+  </div>
+</div>
+
+<script is:inline>
+  // @ts-nocheck
+  const demoRoot = document.querySelector("[data-pathfinding-demo]");
+
+  if (demoRoot) {
+    const canvas = demoRoot.querySelector("[data-pathfinding-canvas]");
+    const ctx = canvas.getContext("2d");
+
+    const obstacleWidthInput = demoRoot.querySelector("[data-obstacle-width]");
+    const algorithmSelect = demoRoot.querySelector("[data-algorithm]");
+    const riskWeightInput = demoRoot.querySelector("[data-risk-weight]");
+    const showRiskInput = demoRoot.querySelector("[data-show-risk]");
+    const runButton = demoRoot.querySelector("[data-run-simulation]");
+    const resultsPanel = demoRoot.querySelector("[data-results]");
+
+    /* =====================================================
+       Simulation constants ported from MATLAB
+       ===================================================== */
+
+    const field = {
+      width: 120,
+      height: 90,
+      gridRes: 0.5,
+    };
+
+    field.nCols = Math.round(field.width / field.gridRes);
+    field.nRows = Math.round(field.height / field.gridRes);
+    field.totalCells = field.nCols * field.nRows;
+
+    const startPos = { x: 0.25, y: 45.25 };
+
+    const obstacleCenters = [
+      [30, 70],
+      [30, 45],
+      [30, 20],
+      [45, 60],
+      [45, 30],
+      [60, 80],
+      [60, 65],
+      [60, 25],
+      [60, 10],
+      [75, 69],
+      [75, 30],
+      [90, 70],
+      [90, 45],
+      [90, 20],
+      [109, 45],
+    ].map(([x, y]) => ({ x, y }));
+
+    const targets = [
+      [119.5, 54.5],
+      [82.5, 15.5],
+      [82.5, 75.5],
+      [60.5, 54.5],
+    ].map(([x, y]) => ({ x, y }));
+
+    const neighbourOffsets = [
+      [0, 1],
+      [1, 0],
+      [0, -1],
+      [-1, 0],
+    ];
+
+    let latestResult = null;
+
+    /* =====================================================
+       Grid conversion helpers
+       ===================================================== */
+
+    function coordToCell(x, y) {
+      return {
+        col: Math.round((x - field.gridRes / 2) / field.gridRes),
+        row: Math.round((y - field.gridRes / 2) / field.gridRes),
+      };
+    }
+
+    function cellToIndex(row, col) {
+      return row * field.nCols + col;
+    }
+
+    function indexToCell(index) {
+      return {
+        row: Math.floor(index / field.nCols),
+        col: index % field.nCols,
+      };
+    }
+
+    function indexToCoord(index) {
+      const { row, col } = indexToCell(index);
+
+      return {
+        x: col * field.gridRes + field.gridRes / 2,
+        y: row * field.gridRes + field.gridRes / 2,
+      };
+    }
+
+    const startCell = coordToCell(startPos.x, startPos.y);
+    const startIndex = cellToIndex(startCell.row, startCell.col);
+
+    /* =====================================================
+       Goal regions and target order
+       ===================================================== */
+
+    function buildGoalRegions() {
+      return targets.map((target) => {
+        const cells = [];
+
+        for (let row = 0; row < field.nRows; row++) {
+          const cy = row * field.gridRes + field.gridRes / 2;
+
+          if (Math.abs(cy - target.y) > field.gridRes / 2 + 1e-9) {
+            continue;
+          }
+
+          for (let col = 0; col < field.nCols; col++) {
+            const cx = col * field.gridRes + field.gridRes / 2;
+
+            if (Math.abs(cx - target.x) <= field.gridRes / 2 + 1e-9) {
+              cells.push(cellToIndex(row, col));
+            }
+          }
+        }
+
+        return cells;
+      });
+    }
+
+    function distance(a, b) {
+      return Math.hypot(a.x - b.x, a.y - b.y);
+    }
+
+    function permutations(items) {
+      if (items.length <= 1) {
+        return [items];
+      }
+
+      const output = [];
+
+      for (let i = 0; i < items.length; i++) {
+        const current = items[i];
+        const remaining = items.slice(0, i).concat(items.slice(i + 1));
+
+        for (const permutation of permutations(remaining)) {
+          output.push([current, ...permutation]);
+        }
+      }
+
+      return output;
+    }
+
+    function getBestTargetOrder() {
+      let bestOrder = [];
+      let bestCost = Infinity;
+
+      for (const order of permutations([0, 1, 2, 3])) {
+        let currentPoint = startPos;
+        let cost = 0;
+
+        for (const targetIndex of order) {
+          cost += distance(currentPoint, targets[targetIndex]);
+          currentPoint = targets[targetIndex];
+        }
+
+        cost += distance(currentPoint, startPos);
+
+        if (cost < bestCost) {
+          bestCost = cost;
+          bestOrder = order;
+        }
+      }
+
+      return bestOrder;
+    }
+
+    const goalRegions = buildGoalRegions();
+    const bestTargetOrder = getBestTargetOrder();
+
+    /* =====================================================
+       Environment generation
+       ===================================================== */
+
+    function buildEnvironment(obstacleWidth) {
+      const obstacleLength = obstacleWidth * 2;
+
+      const obstacleRects = obstacleCenters.map((obstacle, index) => {
+        const isVertical = index < 5 || index > 8;
+        const width = isVertical ? obstacleWidth : obstacleLength;
+        const height = isVertical ? obstacleLength : obstacleWidth;
+
+        return {
+          x: obstacle.x,
+          y: obstacle.y,
+          width,
+          height,
+          xMin: obstacle.x - width / 2,
+          xMax: obstacle.x + width / 2,
+          yMin: obstacle.y - height / 2,
+          yMax: obstacle.y + height / 2,
+        };
+      });
+
+      const obstacleMap = new Uint8Array(field.totalCells);
+
+      for (let row = 0; row < field.nRows; row++) {
+        const cy = row * field.gridRes + field.gridRes / 2;
+        const cellYMin = cy - field.gridRes / 2;
+        const cellYMax = cy + field.gridRes / 2;
+
+        for (let col = 0; col < field.nCols; col++) {
+          const cx = col * field.gridRes + field.gridRes / 2;
+          const cellXMin = cx - field.gridRes / 2;
+          const cellXMax = cx + field.gridRes / 2;
+
+          for (const obstacle of obstacleRects) {
+            const xOverlap = cellXMin < obstacle.xMax && cellXMax > obstacle.xMin;
+            const yOverlap = cellYMin < obstacle.yMax && cellYMax > obstacle.yMin;
+
+            if (xOverlap && yOverlap) {
+              obstacleMap[cellToIndex(row, col)] = 1;
+              break;
+            }
+          }
+        }
+      }
+
+      const dangerMap = new Uint8Array(field.totalCells);
+      const obstacleCells = [];
+
+      for (let index = 0; index < obstacleMap.length; index++) {
+        if (obstacleMap[index]) {
+          dangerMap[index] = 4;
+          obstacleCells.push(index);
+        }
+      }
+
+      for (const obstacleIndex of obstacleCells) {
+        const { row: obstacleRow, col: obstacleCol } = indexToCell(obstacleIndex);
+
+        for (let dr = -6; dr <= 6; dr++) {
+          for (let dc = -6; dc <= 6; dc++) {
+            const row = obstacleRow + dr;
+            const col = obstacleCol + dc;
+
+            if (row < 0 || col < 0 || row >= field.nRows || col >= field.nCols) {
+              continue;
+            }
+
+            const dist = Math.abs(dr) + Math.abs(dc);
+            let level = 0;
+
+            if (dist === 0) {
+              level = 4;
+            } else if (dist <= 2) {
+              level = 3;
+            } else if (dist <= 4) {
+              level = 2;
+            } else if (dist <= 6) {
+              level = 1;
+            }
+
+            if (level > 0) {
+              const index = cellToIndex(row, col);
+              dangerMap[index] = Math.max(dangerMap[index], level);
+            }
+          }
+        }
+      }
+
+      return {
+        obstacleRects,
+        obstacleMap,
+        dangerMap,
+      };
+    }
+
+    /* =====================================================
+       Min heap priority queue
+       ===================================================== */
+
+    class MinHeap {
+      constructor() {
+        this.items = [];
+      }
+
+      get size() {
+        return this.items.length;
+      }
+
+      push(item) {
+        this.items.push(item);
+        this.bubbleUp(this.items.length - 1);
+      }
+
+      pop() {
+        if (this.items.length === 0) {
+          return null;
+        }
+
+        const min = this.items[0];
+        const end = this.items.pop();
+
+        if (this.items.length > 0) {
+          this.items[0] = end;
+          this.sinkDown(0);
+        }
+
+        return min;
+      }
+
+      bubbleUp(index) {
+        const item = this.items[index];
+
+        while (index > 0) {
+          const parentIndex = Math.floor((index - 1) / 2);
+          const parent = this.items[parentIndex];
+
+          if (item.priority >= parent.priority) {
+            break;
+          }
+
+          this.items[index] = parent;
+          index = parentIndex;
+        }
+
+        this.items[index] = item;
+      }
+
+      sinkDown(index) {
+        const length = this.items.length;
+        const item = this.items[index];
+
+        while (true) {
+          const leftIndex = 2 * index + 1;
+          const rightIndex = leftIndex + 1;
+          let swapIndex = null;
+
+          if (
+            leftIndex < length &&
+            this.items[leftIndex].priority < item.priority
+          ) {
+            swapIndex = leftIndex;
+          }
+
+          if (
+            rightIndex < length &&
+            this.items[rightIndex].priority <
+              (swapIndex === null ? item.priority : this.items[leftIndex].priority)
+          ) {
+            swapIndex = rightIndex;
+          }
+
+          if (swapIndex === null) {
+            break;
+          }
+
+          this.items[index] = this.items[swapIndex];
+          index = swapIndex;
+        }
+
+        this.items[index] = item;
+      }
+    }
+
+    /* =====================================================
+       Pathfinding helpers
+       ===================================================== */
+
+    function makeGoalMask(goalCells) {
+      const mask = new Uint8Array(field.totalCells);
+
+      for (const index of goalCells) {
+        mask[index] = 1;
+      }
+
+      return mask;
+    }
+
+    function makeHeuristic(goalCells) {
+      const goalCoords = goalCells.map(indexToCoord);
+
+      return function heuristic(index) {
+        const point = indexToCoord(index);
+        let bestDistance = Infinity;
+
+        for (const goal of goalCoords) {
+          const candidateDistance = Math.hypot(goal.x - point.x, goal.y - point.y);
+
+          if (candidateDistance < bestDistance) {
+            bestDistance = candidateDistance;
+          }
+        }
+
+        return bestDistance;
+      };
+    }
+
+    function reconstructPath(parent, start, finish) {
+      const path = [];
+      let current = finish;
+
+      while (current !== start) {
+        if (current < 0 || parent[current] === -1) {
+          return [];
+        }
+
+        path.push(current);
+        current = parent[current];
+      }
+
+      path.push(start);
+      path.reverse();
+
+      return path;
+    }
+
+    function runAStarSegment(start, goalCells, obstacleMap, dangerMap, riskWeight) {
+      const goalMask = makeGoalMask(goalCells);
+      const heuristic = makeHeuristic(goalCells);
+
+      const gScore = new Float64Array(field.totalCells);
+      gScore.fill(Infinity);
+
+      const parent = new Int32Array(field.totalCells);
+      parent.fill(-1);
+
+      const closed = new Uint8Array(field.totalCells);
+      const openSet = new MinHeap();
+
+      gScore[start] = 0;
+      parent[start] = start;
+
+      openSet.push({
+        index: start,
+        priority: heuristic(start),
+      });
+
+      while (openSet.size > 0) {
+        const current = openSet.pop().index;
+
+        if (closed[current]) {
+          continue;
+        }
+
+        closed[current] = 1;
+
+        if (goalMask[current]) {
+          return reconstructPath(parent, start, current);
+        }
+
+        const { row, col } = indexToCell(current);
+
+        for (const [dr, dc] of neighbourOffsets) {
+          const nextRow = row + dr;
+          const nextCol = col + dc;
+
+          if (
+            nextRow < 0 ||
+            nextCol < 0 ||
+            nextRow >= field.nRows ||
+            nextCol >= field.nCols
+          ) {
+            continue;
+          }
+
+          const nextIndex = cellToIndex(nextRow, nextCol);
+
+          if (obstacleMap[nextIndex] || closed[nextIndex]) {
+            continue;
+          }
+
+          const dangerPenalty = dangerMap[nextIndex] * riskWeight;
+          const tentativeG = gScore[current] + field.gridRes + dangerPenalty;
+
+          if (tentativeG < gScore[nextIndex]) {
+            gScore[nextIndex] = tentativeG;
+            parent[nextIndex] = current;
+
+            openSet.push({
+              index: nextIndex,
+              priority: tentativeG + heuristic(nextIndex),
+            });
+          }
+        }
+      }
+
+      return [];
+    }
+
+    function runGreedySegment(start, goalCells, obstacleMap) {
+      const goalMask = makeGoalMask(goalCells);
+      const heuristic = makeHeuristic(goalCells);
+
+      const visited = new Uint8Array(field.totalCells);
+
+      const parent = new Int32Array(field.totalCells);
+      parent.fill(-1);
+
+      const openSet = new MinHeap();
+
+      visited[start] = 1;
+      parent[start] = start;
+
+      openSet.push({
+        index: start,
+        priority: heuristic(start),
+      });
+
+      while (openSet.size > 0) {
+        const current = openSet.pop().index;
+
+        if (goalMask[current]) {
+          return reconstructPath(parent, start, current);
+        }
+
+        const { row, col } = indexToCell(current);
+
+        for (const [dr, dc] of neighbourOffsets) {
+          const nextRow = row + dr;
+          const nextCol = col + dc;
+
+          if (
+            nextRow < 0 ||
+            nextCol < 0 ||
+            nextRow >= field.nRows ||
+            nextCol >= field.nCols
+          ) {
+            continue;
+          }
+
+          const nextIndex = cellToIndex(nextRow, nextCol);
+
+          if (visited[nextIndex] || obstacleMap[nextIndex]) {
+            continue;
+          }
+
+          visited[nextIndex] = 1;
+          parent[nextIndex] = current;
+
+          openSet.push({
+            index: nextIndex,
+            priority: heuristic(nextIndex),
+          });
+        }
+      }
+
+      return [];
+    }
+
+    function runFullPath(algorithm, environment, riskWeight) {
+      let current = startIndex;
+      const fullPath = [];
+      const segments = [];
+
+      for (const targetIndex of bestTargetOrder) {
+        const goalRegion = goalRegions[targetIndex];
+
+        const segment =
+          algorithm === "astar"
+            ? runAStarSegment(
+                current,
+                goalRegion,
+                environment.obstacleMap,
+                environment.dangerMap,
+                riskWeight
+              )
+            : runGreedySegment(
+                current,
+                goalRegion,
+                environment.obstacleMap
+              );
+
+        if (!segment.length) {
+          return {
+            path: [],
+            segments,
+            failed: true,
+          };
+        }
+
+        fullPath.push(...segment);
+        segments.push({
+          target: `T${targetIndex + 1}`,
+          steps: segment.length,
+        });
+
+        current = segment[segment.length - 1];
+      }
+
+      const returnSegment =
+        algorithm === "astar"
+          ? runAStarSegment(
+              current,
+              [startIndex],
+              environment.obstacleMap,
+              environment.dangerMap,
+              riskWeight
+            )
+          : runGreedySegment(
+              current,
+              [startIndex],
+              environment.obstacleMap
+            );
+
+      if (!returnSegment.length) {
+        return {
+          path: fullPath,
+          segments,
+          failed: true,
+        };
+      }
+
+      fullPath.push(...returnSegment);
+      segments.push({
+        target: "Base",
+        steps: returnSegment.length,
+      });
+
+      return {
+        path: fullPath,
+        segments,
+        failed: false,
+      };
+    }
+
+    function summarisePath(path, dangerMap) {
+      let safe = 0;
+      let low = 0;
+      let medium = 0;
+      let high = 0;
+
+      for (const index of path) {
+        const level = dangerMap[index];
+
+        if (level === 0) {
+          safe++;
+        } else if (level === 1) {
+          low++;
+        } else if (level === 2) {
+          medium++;
+        } else {
+          high++;
+        }
+      }
+
+      return {
+        steps: path.length,
+        distance: Math.max(0, path.length - 1) * field.gridRes,
+        safe,
+        low,
+        medium,
+        high,
+      };
+    }
+
+    /* =====================================================
+       Drawing helpers
+       ===================================================== */
+
+    function resizeCanvas() {
+      const devicePixelRatio = window.devicePixelRatio || 1;
+      const cssWidth = canvas.getBoundingClientRect().width || 900;
+      const cssHeight = cssWidth * 0.75;
+
+      canvas.style.height = `${cssHeight}px`;
+      canvas.width = Math.round(cssWidth * devicePixelRatio);
+      canvas.height = Math.round(cssHeight * devicePixelRatio);
+
+      ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+    }
+
+    function getCanvasSize() {
+      return {
+        width: canvas.getBoundingClientRect().width,
+        height: parseFloat(canvas.style.height) || canvas.getBoundingClientRect().height,
+      };
+    }
+
+    function worldToCanvas(x, y) {
+      const { width, height } = getCanvasSize();
+      const padding = 34;
+
+      return {
+        x: padding + (x / field.width) * (width - padding * 2),
+        y: height - padding - (y / field.height) * (height - padding * 2),
+      };
+    }
+
+    function drawRectWorld(xMin, yMin, width, height, fillStyle, strokeStyle) {
+      const bottomLeft = worldToCanvas(xMin, yMin);
+      const topRight = worldToCanvas(xMin + width, yMin + height);
+
+      const rectX = bottomLeft.x;
+      const rectY = topRight.y;
+      const rectWidth = topRight.x - bottomLeft.x;
+      const rectHeight = bottomLeft.y - topRight.y;
+
+      ctx.fillStyle = fillStyle;
+      ctx.strokeStyle = strokeStyle;
+      ctx.lineWidth = 1;
+      ctx.fillRect(rectX, rectY, rectWidth, rectHeight);
+      ctx.strokeRect(rectX, rectY, rectWidth, rectHeight);
+    }
+
+    function drawCircleWorld(x, y, radius, fillStyle, strokeStyle) {
+      const point = worldToCanvas(x, y);
+      const scaledRadius = Math.max(radius, 4);
+
+      ctx.beginPath();
+      ctx.arc(point.x, point.y, scaledRadius, 0, Math.PI * 2);
+      ctx.fillStyle = fillStyle;
+      ctx.strokeStyle = strokeStyle;
+      ctx.lineWidth = 1.5;
+      ctx.fill();
+      ctx.stroke();
+    }
+
+    function drawPath(path, strokeStyle, lineWidth) {
+      if (!path || path.length < 2) {
+        return;
+      }
+
+      ctx.beginPath();
+
+      path.forEach((index, position) => {
+        const coord = indexToCoord(index);
+        const point = worldToCanvas(coord.x, coord.y);
+
+        if (position === 0) {
+          ctx.moveTo(point.x, point.y);
+        } else {
+          ctx.lineTo(point.x, point.y);
+        }
+      });
+
+      ctx.strokeStyle = strokeStyle;
+      ctx.lineWidth = lineWidth;
+      ctx.lineJoin = "round";
+      ctx.lineCap = "round";
+      ctx.stroke();
+    }
+
+    function drawDangerMap(dangerMap) {
+      for (let row = 0; row < field.nRows; row++) {
+        for (let col = 0; col < field.nCols; col++) {
+          const index = cellToIndex(row, col);
+          const level = dangerMap[index];
+
+          if (level === 0 || level === 4) {
+            continue;
+          }
+
+          let fillStyle = "rgba(80, 255, 130, 0.18)";
+
+          if (level === 2) {
+            fillStyle = "rgba(255, 230, 80, 0.22)";
+          }
+
+          if (level >= 3) {
+            fillStyle = "rgba(255, 115, 80, 0.28)";
+          }
+
+          drawRectWorld(
+            col * field.gridRes,
+            row * field.gridRes,
+            field.gridRes,
+            field.gridRes,
+            fillStyle,
+            fillStyle
+          );
+        }
+      }
+    }
+
+    function drawSimulation(result) {
+      resizeCanvas();
+
+      const { width, height } = getCanvasSize();
+
+      ctx.clearRect(0, 0, width, height);
+      ctx.fillStyle = "rgba(255, 255, 255, 0.025)";
+      ctx.fillRect(0, 0, width, height);
+
+      if (result.showRisk) {
+        drawDangerMap(result.environment.dangerMap);
+      }
+
+      const fieldBottomLeft = worldToCanvas(0, 0);
+      const fieldTopRight = worldToCanvas(field.width, field.height);
+
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.8)";
+      ctx.lineWidth = 2;
+      ctx.strokeRect(
+        fieldBottomLeft.x,
+        fieldTopRight.y,
+        fieldTopRight.x - fieldBottomLeft.x,
+        fieldBottomLeft.y - fieldTopRight.y
+      );
+
+      for (const obstacle of result.environment.obstacleRects) {
+        drawRectWorld(
+          obstacle.xMin,
+          obstacle.yMin,
+          obstacle.width,
+          obstacle.height,
+          "rgba(255, 100, 100, 0.55)",
+          "rgba(255, 100, 100, 0.95)"
+        );
+      }
+
+      for (const [index, target] of targets.entries()) {
+        drawCircleWorld(target.x, target.y, 5, "rgba(95, 255, 125, 0.95)", "rgba(10, 25, 15, 0.95)");
+
+        const labelPoint = worldToCanvas(target.x + 2, target.y + 2);
+        ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+        ctx.font = "12px monospace";
+        ctx.fillText(`T${index + 1}`, labelPoint.x, labelPoint.y);
+      }
+
+      drawCircleWorld(startPos.x, startPos.y, 5, "rgba(255, 120, 255, 0.95)", "rgba(40, 15, 40, 0.95)");
+
+      if (result.astar) {
+        drawPath(result.astar.path, "rgba(80, 220, 255, 0.95)", 3);
+      }
+
+      if (result.greedy) {
+        drawPath(result.greedy.path, "rgba(255, 210, 90, 0.92)", 2.5);
+      }
+    }
+
+    /* =====================================================
+       Results output
+       ===================================================== */
+
+    function buildResultRow(label, result, summary) {
+      const failedText = result.failed ? "Yes" : "No";
+
+      return `
+        <tr>
+          <td>${label}</td>
+          <td>${failedText}</td>
+          <td>${summary.steps}</td>
+          <td>${summary.distance.toFixed(1)} m</td>
+          <td>${summary.safe}</td>
+          <td>${summary.low}</td>
+          <td>${summary.medium}</td>
+          <td>${summary.high}</td>
+        </tr>
+      `;
+    }
+
+    function updateResults(result) {
+      const rows = [];
+
+      if (result.astar) {
+        rows.push(
+          buildResultRow("A*", result.astar, summarisePath(result.astar.path, result.environment.dangerMap))
+        );
+      }
+
+      if (result.greedy) {
+        rows.push(
+          buildResultRow("Greedy", result.greedy, summarisePath(result.greedy.path, result.environment.dangerMap))
+        );
+      }
+
+      resultsPanel.innerHTML = `
+        <div class="results-summary">
+          <p>
+            Obstacle width: <strong>${result.obstacleWidth} m</strong>
+            | A* risk weight: <strong>${result.riskWeight}</strong>
+            | Target order: <strong>${bestTargetOrder.map((index) => `T${index + 1}`).join(" → ")}</strong>
+          </p>
+        </div>
+
+        <div class="results-table-wrapper">
+          <table class="demo-results-table">
+            <thead>
+              <tr>
+                <th>Algorithm</th>
+                <th>Failed</th>
+                <th>Steps</th>
+                <th>Path length</th>
+                <th>Safe</th>
+                <th>Low</th>
+                <th>Medium</th>
+                <th>High</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              ${rows.join("")}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    /* =====================================================
+       Main simulation runner
+       ===================================================== */
+
+    function runSimulation() {
+      const obstacleWidth = Math.min(
+        12,
+        Math.max(1, Number(obstacleWidthInput.value) || 1)
+      );
+
+      const riskWeight = Math.min(
+        5,
+        Math.max(0, Number(riskWeightInput.value) || 0)
+      );
+
+      obstacleWidthInput.value = obstacleWidth;
+      riskWeightInput.value = riskWeight;
+
+      const selectedAlgorithm = algorithmSelect.value;
+      const environment = buildEnvironment(obstacleWidth);
+
+      const result = {
+        obstacleWidth,
+        riskWeight,
+        selectedAlgorithm,
+        showRisk: showRiskInput.checked,
+        environment,
+        astar: null,
+        greedy: null,
+      };
+
+      if (selectedAlgorithm === "astar" || selectedAlgorithm === "both") {
+        result.astar = runFullPath("astar", environment, riskWeight);
+      }
+
+      if (selectedAlgorithm === "greedy" || selectedAlgorithm === "both") {
+        result.greedy = runFullPath("greedy", environment, riskWeight);
+      }
+
+      latestResult = result;
+
+      drawSimulation(result);
+      updateResults(result);
+    }
+
+    runButton.addEventListener("click", runSimulation);
+    showRiskInput.addEventListener("change", runSimulation);
+
+    window.addEventListener("resize", () => {
+      if (latestResult) {
+        drawSimulation(latestResult);
+      }
+    });
+
+    runSimulation();
+  }
+</script>
+
+<style>
+  /* =======================================================
+     Demo shell
+     ======================================================= */
+
+
+
+   .demo-note {
+   padding: 0.8rem 0.95rem;
+   border: 1px solid var(--accent-soft, rgba(255, 255, 255, 0.12));
+   border-radius: 0.75rem;
+   background: rgba(255, 255, 255, 0.035);
+   color: var(--text-muted);
+   line-height: 1.5;
+ }
+
+ .demo-note strong {
+   color: var(--accent);
+ }
+
+  .pathfinding-demo {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+
+  .demo-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    gap: 0.85rem;
+  }
+
+  .demo-controls label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+  }
+
+  .demo-controls input,
+  .demo-controls select,
+  .demo-controls button {
+    border: 1px solid var(--accent-soft, rgba(255, 255, 255, 0.12));
+    border-radius: 0.55rem;
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text-main);
+    font: inherit;
+  }
+
+  .demo-controls input,
+  .demo-controls select {
+    min-width: 8rem;
+    padding: 0.55rem 0.65rem;
+  }
+
+  /* Algorithm dropdown menu */
+.demo-controls select {
+  color-scheme: dark;
+  cursor: pointer;
+}
+
+/* Individual dropdown options */
+.demo-controls select option {
+  background-color: var(--bg-card, #3c5266);
+  color: var(--text-main, #f4e4d4);
+}
+
+/* Currently selected option */
+.demo-controls select option:checked {
+  background-color: var(--accent, #f0ca69);
+  color: var(--bg-main, #263b4d);
+}
+
+/* Highlight around the dropdown while selecting */
+.demo-controls select:focus {
+  border-color: var(--accent);
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+  .demo-controls button {
+    padding: 0.65rem 0.85rem;
+    color: var(--accent);
+    cursor: pointer;
+  }
+
+  .demo-controls button:hover {
+    border-color: var(--accent);
+  }
+
+  .checkbox-label {
+    flex-direction: row !important;
+    align-items: center;
+    gap: 0.5rem !important;
+    padding-bottom: 0.55rem;
+  }
+
+  .checkbox-label input {
+    min-width: auto;
+  }
+
+  /* =======================================================
+     Canvas
+     ======================================================= */
+
+  .canvas-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.canvas-title {
+  color: var(--accent);
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+canvas {
+  width: 100%;
+  min-height: 320px;
+  border: 1px solid var(--accent-soft, rgba(255, 255, 255, 0.12));
+  border-radius: 0.85rem;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+  /* =======================================================
+     Legend
+     ======================================================= */
+
+  .demo-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.9rem;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+  }
+
+  .demo-legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  .legend-dot {
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 999px;
+    display: inline-block;
+  }
+
+  .legend-dot.start {
+    background: rgba(255, 120, 255, 0.95);
+  }
+
+  .legend-dot.target {
+    background: rgba(95, 255, 125, 0.95);
+  }
+
+  .legend-dot.obstacle {
+    background: rgba(255, 100, 100, 0.95);
+  }
+
+  .legend-line {
+    width: 1.5rem;
+    height: 0.2rem;
+    display: inline-block;
+    border-radius: 999px;
+  }
+
+  .legend-line.astar {
+    background: rgba(80, 220, 255, 0.95);
+  }
+
+  .legend-line.greedy {
+    background: rgba(255, 210, 90, 0.92);
+  }
+
+  /* =======================================================
+     Results table
+     ======================================================= */
+
+  .demo-results {
+    color: var(--text-muted);
+  }
+
+  .results-summary p {
+    margin-top: 0;
+  }
+
+  .results-table-wrapper {
+    overflow-x: auto;
+  }
+
+  .demo-results-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+  }
+
+  .demo-results-table th,
+  .demo-results-table td {
+    padding: 0.55rem 0.65rem;
+    border: 1px solid var(--accent-soft, rgba(255, 255, 255, 0.12));
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  .demo-results-table th {
+    color: var(--accent);
+    background: rgba(255, 255, 255, 0.04);
+  }
+
+  .demo-results-table td {
+    color: var(--text-muted);
+  }
+</style>

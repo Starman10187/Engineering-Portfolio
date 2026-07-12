@@ -1,0 +1,698 @@
+---
+import ProjectWriteupLayout from "../../components/ProjectPageTemplating/ProjectWriteupLayout.astro";
+import ProjectMediaGrid from "../../components/ProjectPageTemplating/ProjectMediaGrid.astro";
+import ContentBlock from "../../components/ProjectPageTemplating/ContentBlock.astro";
+---
+
+<ProjectWriteupLayout
+  title="Micromouse Robot"
+  intro="An autonomous micromouse-style robot developed for SER300 Mechatronic Design, combining STM32 embedded programming, custom PCB design, sensor feedback, encoder-based turning, motor control, and iterative mechanical development across three major robot revisions."
+>
+  <!-- =====================================================
+       01. PROJECT OVERVIEW
+       ===================================================== -->
+
+  <section slot="overview">
+    <ContentBlock title="Project Overview">
+      <p>
+        Theseus 3 was the final iteration of my autonomous micromouse-style
+        robot developed for SER300 Mechatronic Design. The project challenged
+        students to design, build, program, and test a small autonomous robot
+        capable of navigating a physical obstacle course using sensor feedback
+        and embedded control logic.
+      </p>
+
+      <p>
+        The course required more than simple straight-line driving. The robot
+        had to respond to maze cells, raised causeway sections, transitions
+        between course features, and a spiral incline. This made the project a
+        practical exercise in mechatronics integration, where mechanical
+        packaging, PCB design, sensor selection, motor control, firmware
+        structure, and calibration all affected the final result.
+      </p>
+
+      <p>
+        The robot evolved through three major revisions: Theseus 1, Theseus 2,
+        and Theseus 3. Earlier concepts were more ambitious and included more
+        complex sensor and PCB designs, but these became difficult to progress
+        within the available timeframe. The final robot was simplified into a
+        more achievable system based around an STM32 Nucleo controller, custom
+        two-level PCB structure, N20 motors, encoder feedback, IR proximity
+        sensors, and state-machine-driven firmware.
+      </p>
+
+      <p>
+        While the final demonstration did not result in a complete flawless
+        course run, the project became one of my most valuable embedded robotics
+        learning experiences. It gave me practical exposure to PCB design, SMD
+        soldering, STM32CubeIDE, timer interrupts, PWM motor control, encoder
+        feedback, sensor calibration, and debugging a physical robot under real
+        constraints.
+      </p>
+    </ContentBlock>
+
+    <ProjectMediaGrid
+      layout="stack"
+      media={[
+        {
+          // Image should be:
+          // A clean hero photo of Theseus 3 fully assembled on the maze,
+          // causeway, or spiral course.
+          src: "/Micro_Mouse/Micro_Mouse_Hero_2.jpg",
+          alt: "Theseus 3 micromouse navigating the chasm section",
+          caption: "Theseus 3 micromouse navigating the chasm section",
+        },
+      ]}
+    />
+
+    <ContentBlock title="Final Robot Demonstration">
+      <p>
+        The behaviour shown in this test represents the core of the project:
+        reading proximity sensors, evaluating the current maze condition,
+        entering a drive state, and using motor control and encoder counts to
+        perform forward movement and turning manoeuvres.
+      </p>
+
+      <ProjectMediaGrid
+        layout="stack"
+        media={[
+          {
+            kind: "video",
+            src: "/Micro_Mouse/Micro_Mouse_4_Cells.mp4",
+            alt: "Theseus 3 taking turns inside the 2x2 cell maze",
+            caption: "Theseus 3 navigating a 2x2 cell maze this assisted in calibrating the sensors.",
+            //controls: true,
+            mimeType: "video/mp4",
+          },
+        ]}
+      />
+    </ContentBlock>
+  </section>
+
+  <!-- =====================================================
+       02. KEY FEATURES
+       ===================================================== -->
+
+  <section slot="key-features">
+    <ContentBlock title="Design Iteration">
+      <p>
+        A major part of this project was the process of iteration. The final
+        robot was not the first design, but the result of several revisions that
+        gradually reduced complexity in favour of reliability, manufacturability,
+        and the ability to test quickly.
+      </p>
+
+      <p>
+        Theseus 1 and Theseus 2 explored more ambitious concepts, including more
+        complex sensing, denser PCB layouts, surface-mount hardware, and I2C
+        devices. These designs were valuable learning exercises, especially for
+        PCB design, datasheet interpretation, footprint selection, SMD soldering,
+        and board bring-up.
+      </p>
+
+      <p>
+        As the project progressed, the design was simplified into Theseus 3.
+        This final version focused on a more achievable combination of binary IR
+        proximity sensing, encoder-assisted motor control, a custom two-board PCB
+        structure, and firmware built around a sensor evaluation function and
+        drive state machine.
+      </p>
+    </ContentBlock>
+
+    <ProjectMediaGrid
+      layout="grid"
+      uniform={true}
+      media={[
+        {
+          // Image should be:
+          // A comparison of Theseus 2 and Theseus 3 PCB renders.
+          // The report already has a strong image showing the reduction in PCB complexity.
+          src: "/Micro_Mouse/Early_Printed_Model.jpg",
+          alt: "Comparison image showing the PCB design changes between earlier Theseus revisions and Theseus 3",
+        },
+        {
+          // Image should be:
+          // A comparison of Theseus 2 and Theseus 3 PCB renders.
+          // The report already has a strong image showing the reduction in PCB complexity.
+          src: "/Micro_Mouse/TOF_Mouse.png",
+          alt: "Comparison image showing the PCB design changes between earlier Theseus revisions and Theseus 3",
+        },
+        {
+          // Image should be:
+          // A comparison of Theseus 2 and Theseus 3 PCB renders.
+          // The report already has a strong image showing the reduction in PCB complexity.
+          src: "/Micro_Mouse/Flexible_PCB.JPG",
+          alt: "Comparison image showing the PCB design changes between earlier Theseus revisions and Theseus 3",
+        },
+        
+        {
+          // Image should be:
+          // A photo or render showing the final robot from the front or side.
+          // Ideally this should clearly show the stacked two-level construction.
+          src: "/Micro_Mouse/Micro_Mouse_Blue_Prototype.jpg",
+          alt: "Final assembled Theseus 3 robot showing the two-level body structure and compact electronics layout",
+        },
+      ]}
+    />
+
+    <ContentBlock title="Course Requirements">
+      <p>
+        The micromouse course combined multiple physical challenges. Maze cells
+        required the robot to identify wall conditions and make turning
+        decisions. Raised causeway sections required the robot to keep correcting
+        its direction while travelling along a constrained path. The spiral
+        incline introduced a traction and stability challenge, especially as the
+        robot climbed the banked upper section.
+      </p>
+
+      <p>
+        This made the project more difficult than simply programming a robot to
+        follow a line or drive straight. The robot had to recognise different
+        course states, transition between them, and respond to imperfect sensor
+        feedback while maintaining enough mechanical stability to continue
+        moving.
+      </p>
+    </ContentBlock>
+
+    <ProjectMediaGrid
+      layout="stack"
+      media={[
+        {
+          // Image should be:
+          // A wide image of the physical course showing maze cells, causeway,
+          // and spiral sections if possible.
+          src: "/public/Micro_Mouse/Maze.jpg",
+          alt: "Overview of the physical micromouse obstacle course showing the maze, causeway, and spiral sections",
+        },
+      ]}
+    />
+
+    <ContentBlock title="Mechanical Design">
+      <p>
+        The mechanical design was built around a compact four-wheel robot body
+        with a rounded front profile. From early in the design phase I leaned
+        toward a four-wheel layout, similar to a small conventional vehicle.
+        This decision influenced the robot footprint, motor placement, PCB
+        layout, and eventual two-level body structure.
+      </p>
+
+      <p>
+        The final robot used two stacked PCB levels supported by 3D printed side
+        walls. These side walls provided rigidity, supported the upper and lower
+        PCB layers, housed the N20 motors, and created internal space for wiring.
+        A sliding divider was used to keep the motor wiring and connectors
+        contained, while also leaving a protected space for a compact 2S LiPo
+        battery.
+      </p>
+
+      <p>
+        The drivetrain went through several concepts. The first idea was to link
+        wheel pairs with gears, including an intermediate gear so both wheels on
+        each side would rotate in the same direction. This proved difficult due
+        to the resolution and tolerance limits of small 3D printed gears. A
+        timing belt and pulley arrangement was then explored, but belt tension
+        introduced bending forces on the motors and affected driving
+        consistency.
+      </p>
+
+      <p>
+        The final solution removed the linked wheel pairs and used two powered
+        wheels with two free-spinning wheels. This made the robot simpler and
+        faster to complete, but introduced trade-offs in traction, slippage, and
+        turning accuracy, particularly on the spiral incline.
+      </p>
+    </ContentBlock>
+
+    <ProjectMediaGrid
+      layout="grid"
+      uniform={true}
+      media={[
+        {
+          // Image should be:
+          // A close side view showing the two stacked PCB levels and 3D printed side walls.
+          src: "/Micro_Mouse/Micro_Mouse_Multi_Level.jpg",
+          alt: "Side view of Theseus 3 showing the two-level PCB structure and 3D printed side supports",
+          caption: "Theseus 3's multi-level construction, allowing for battery installment in the central space.",
+        },
+        {
+          // Image should be:
+          // A wheel or transmission experiment image, such as gears, belts,
+          // or a close-up of the final simplified wheel layout.
+          src: "/Micro_Mouse/Micro_Mouse_Original_Wheel_Gearing_Approach.jpg",
+          alt: "Transmission design iteration showing the move from linked wheel concepts toward the simplified final wheel layout",
+          caption: "Original N20 gearing approach to power both wheels, later replaced with V-belt.",
+        },
+        {
+          // Image should be:
+          // A close photo showing the motor mounting area and wiring compartment.
+          src: "/Micro_Mouse/Micro_Mouse_Belted_Overview.jpg",
+          alt: "Close-up of the Belting Approach",
+          caption: "Overview of the belt-style transmission, wheel hubs were resin printed.",
+        },
+        {
+          // Image should be:
+          // A close side view showing the two stacked PCB levels and 3D printed side walls.
+          src: "/Micro_Mouse/Micro_Mouse_Belt_Bend.jpg",
+          alt: "Side view of Theseus 3 showing the two-level PCB structure and 3D printed side supports",
+          caption: "Belt System introduced a lot of warp to the wheel orientation, this was later replaced by powering only 2 wheels, due to time constraints.",
+        },
+      ]}
+    />
+
+    <ContentBlock title="Sensor System">
+      <p>
+        The sensor system changed significantly throughout the project. Early
+        ideas included through-hole IR emitters with phototransistors, surface
+        mount IR emitter and phototransistor pairs, and time-of-flight sensors.
+        These options had the advantage of potentially providing more detailed
+        distance information, but also increased the electrical and software
+        complexity.
+      </p>
+
+      <p>
+        The final Theseus 3 design used Pololu 38 kHz IR proximity sensors. This
+        was a more achievable solution within the timeframe, but it meant the
+        robot was working mostly with binary detection rather than measured
+        distance. Instead of knowing that a wall was at a specific distance, the
+        robot largely knew only whether a wall was detected or not detected.
+      </p>
+
+      <p>
+        This made calibration one of the most important parts of the project.
+        Sensor placement, wall distance, detection threshold, and the physical
+        dimensions of the robot all affected how reliably the robot could detect
+        maze walls and course edges. In hindsight, an analogue or distance-based
+        IR solution would have provided more useful feedback for wall following
+        and alignment.
+      </p>
+    </ContentBlock>
+
+    <ProjectMediaGrid
+      layout="stack"
+      media={[
+        {
+          // Image should be:
+          // A front view showing the front and angled IR proximity sensors.
+          src: "/Micro_Mouse/Micro_Mouse_Wall_Sensor.jpg",
+          alt: "Front sensor layout showing the front and angled IR proximity sensors used for wall and course detection",
+          caption: "The final wall sensor solution featured two shielded IR sensors adjusted in such a way that the mouse could tack between sensor thresholds to maintain ideal spacing away from the wall.",
+        },
+      ]}
+    />
+
+    <ProjectMediaGrid
+    layout="stack"
+    uniform={true}
+    media={[
+    {
+      kind: "video",
+      src: "/Micro_Mouse/Micro_Mouse_Tacking_2.mp4",
+      alt: "Video of Theseus 3 navigating a maze section, adjusting wheel speeds to ensure ideal distance away from wall.",
+      caption: "Video of Theseus 3 navigating a maze section, adjusting wheel speeds to ensure ideal distance away from wall.",
+      //controls: true,
+      mimeType: "video/mp4",
+    },
+    
+  ]}
+  />
+
+  </section>
+
+  <!-- =====================================================
+       03. TECHNICAL DEVELOPMENT
+       ===================================================== -->
+
+  <section slot="technical-development">
+    <ContentBlock title="Electrical Design">
+      <p>
+        The electrical design became one of the largest parts of the project.
+        The final system used a custom pair of PCBs, with an upper and lower
+        board connected using IDC connectors. This allowed power and signals to
+        pass between the two levels while keeping the robot compact and
+        serviceable.
+      </p>
+
+      <p>
+        Earlier revisions explored more complex surface-mount components,
+        including a GPIO expander, inertial measurement unit, LED driver, and
+        time-of-flight sensing. While these features were eventually simplified
+        out of the final robot, they gave me valuable practice with component
+        selection, datasheets, SMD soldering, footprint creation, and I2C
+        communication.
+      </p>
+
+      <p>
+        I initially designed a pair of four-layer boards with internal planes
+        for 3.3 V and ground. This helped reduce routing complexity and gave me
+        experience with a more advanced PCB stack-up. For the final Theseus 3
+        revision, I moved to a pair of two-layer boards with ground pours, partly
+        because the simplified design no longer required a four-layer solution
+        and partly because two-layer boards had a shorter manufacturing
+        timeframe.
+      </p>
+
+      <p>
+        The robot required multiple voltage levels: 3.3 V for the IR proximity
+        sensors, 5 V for the motor driver, encoders, and Bluetooth module, and
+        battery input voltage for the Nucleo VIN supply path. A compact 2S LiPo
+        battery powered the robot, with a fuse and switch included to make
+        testing safer and more predictable.
+      </p>
+    </ContentBlock>
+
+    <ProjectMediaGrid
+      layout="grid"
+      uniform={true}
+      media={[
+        {
+          // Image should be:
+          // Final upper-level PCB render from Altium.
+          src: "/Micro_Mouse/Upper_PCB_RENDER_C.JPG",
+          alt: "Altium render of the top-level PCB used on Theseus 3",
+          caption: "INSERT CAPTION HERE",
+        },
+        {
+          // Image should be:
+          // Final lower-level PCB render from Altium.
+          src: "/Micro_Mouse/Upper_PCB_RENDER_A.JPG",
+          alt: "Altium render of the lower-level PCB used on Theseus 3",
+          caption: "INSERT CAPTION HERE",
+        },
+      ]}
+    />
+
+    <ProjectMediaGrid
+      layout="stack"
+      media={[
+        {
+          // Image should be:
+          // Assembled PCB photo showing Nucleo, connectors, wiring, and board stack.
+          src: "/Micro_Mouse/Lower_PCB_RENDER_A.JPG",
+          alt: "Assembled PCB stack showing the STM32 Nucleo, connectors, and custom micromouse boards",
+          caption: "INSERT CAPTION HERE",
+        },
+        {
+          // Image should be:
+          // Schematic screenshot or cropped circuit block showing power,
+          // sensors, IDC connectors, or motor driver connections.
+          src: "/Micro_Mouse/Lower_PCB_RENDER_B.JPG",
+          alt: "Cropped schematic view showing the final micromouse sensor, power, and motor control connections",
+          caption: "INSERT CAPTION HERE",
+        },
+      ]}
+    />
+
+    <ContentBlock title="Embedded Software">
+      <p>
+        The firmware was written for an STM32 Nucleo board using STM32CubeIDE.
+        The initial software concept was more complex because it needed to
+        interface with multiple I2C devices and other peripherals. As the sensor
+        system was simplified, the final firmware became more focused around
+        reliable sensor reading, state evaluation, and motor control.
+      </p>
+
+      <p>
+        The final software can be summarised as three main parts. First, a
+        timer-based interrupt periodically updated the robot's sensor values.
+        Second, an evaluation function analysed those sensor values to determine
+        what condition the robot was currently in. Third, a drive state machine
+        acted on that decision and commanded the motors accordingly.
+      </p>
+
+      <p>
+        A timer interrupt was used to sample the five proximity sensors at a
+        consistent interval. Motor control was handled using PWM output from a
+        timer peripheral, while direction pins controlled whether the wheels
+        drove forward, reversed, or rotated against each other for turning.
+        Encoder feedback was handled using GPIO interrupts connected to Hall
+        effect sensors on the motors, allowing turns and movements to be tuned
+        using counts rather than fixed delays alone.
+      </p>
+
+      <div class="code-summary">
+        <p class="code-summary-title">Core firmware structure</p>
+
+        <pre class="code-highlight"><code>{`// High-level structure used by Theseus 3
+
+while (EntryCondition == true)
+{
+  Evaluate_Sensors();  // Interpret current sensor readings
+  Drive_State();       // Run the motion state selected by the sensor logic
+}
+
+// Timer interrupt
+// Periodically calls Update_Sensors()
+
+// GPIO interrupts
+// Increment encoder counts when motor encoder pulses are detected
+
+// PWM timer
+// Controls motor speed through the motor driver`}</code></pre>
+      </div>
+    </ContentBlock>
+
+    <ContentBlock title="Sensor Evaluation and Drive State Machine">
+      <p>
+        The sensor evaluation function compared the current readings from the
+        front, left, right, and angled sensors. Different sensor combinations
+        represented different course conditions, such as a left wall only, a
+        front wall, walls on both sides, an open cell, or a condition where one
+        of the angled sensors no longer detected the surface.
+      </p>
+
+      <p>
+        Once a condition was identified, the software assigned a state number.
+        The drive state machine then used that state number to choose the
+        appropriate behaviour. Some states drove the robot forward with a slight
+        correction, while others reversed, turned using encoder counts, corrected
+        clockwise or anticlockwise, or stopped the motors if an unexpected sensor
+        combination occurred.
+      </p>
+
+      <p>
+        This approach gave the robot a structured decision-making system even
+        though the final sensor information was limited. The result was not a
+        full maze-solving algorithm in the competitive micromouse sense, but it
+        was a practical embedded state machine that could demonstrate maze-cell
+        navigation and course correction behaviours.
+      </p>
+    </ContentBlock>
+
+  </section>
+
+  <!-- =====================================================
+       04. PROJECT OUTCOME
+       ===================================================== -->
+
+  <section slot="outcome">
+    <ContentBlock title="Testing and Performance">
+      <p>
+        The final demonstration did not go as cleanly as intended, mainly due to
+        sensor calibration issues on the day. The final IR sensors provided
+        binary wall detection rather than measured distance, so the robot's
+        behaviour was highly dependent on the exact spacing between the sensors
+        and the maze walls.
+      </p>
+
+      <p>
+        Despite this, Theseus 3 was able to demonstrate several important
+        behaviours individually. It could solve several maze cells before
+        calibration drift led it astray, recognise and correct when
+        transitioning between maze and causeway sections, perform corrective
+        driving within the causeway, recognise the transition back into the
+        maze, and partially correct while climbing the spiral incline.
+      </p>
+
+      <p>
+        The spiral exposed one of the main mechanical compromises in the final
+        design. Earlier drivetrain concepts aimed to link the wheels using gears
+        or timing belts, but these created their own reliability issues. The
+        final version used two powered wheels and two free-spinning wheels,
+        which made the robot easier to complete but reduced traction and
+        contributed to side slip on the banked upper section of the spiral.
+      </p>
+
+      <p>
+        In the end, the project was less about presenting a perfect competition
+        robot and more about learning what makes an embedded robotic system
+        reliable. Theseus 3 brought together custom hardware, firmware, sensors,
+        motors, mechanical design, and real-world testing into a single working
+        prototype, even if the final outcome fell short of the original goal.
+      </p>
+    </ContentBlock>
+
+    <ProjectMediaGrid
+  layout="grid"
+  uniform={true}
+  media={[
+    {
+      kind: "video",
+      src: "/Micro_Mouse/Micro_Mouse_Spiral_Video.mp4",
+      alt: "Video of Theseus 3 completing a turn inside the 2x2 cell maze",
+      caption: "Theseus 3 completing a controlled turn inside the 2x2 test maze.",
+      //controls: true,
+      mimeType: "video/mp4",
+    },
+    {
+      kind: "video",
+      src: "/Micro_Mouse/Micro_Mouse_Chasm.mp4",
+      alt: "Theseus 3 positioned inside the maze cells during navigation testing",
+      caption: "Theseus 3 positioned within the maze cells during navigation testing.",
+      //controls: true,
+      mimeType: "video/mp4",
+    },
+  ]}
+/>
+
+    <ContentBlock title="What I Would Improve">
+      <p>
+        If I were to revisit this project, the first improvement would be the
+        sensor system. A distance-based or analogue sensing approach would
+        provide more useful information than simple binary wall detection,
+        allowing the robot to better estimate its position within each cell and
+        perform more consistent wall following.
+      </p>
+
+      <p>
+        I would also redesign the drivetrain around symmetrical powered wheels,
+        improved traction, and more reliable transmission geometry. The final
+        offset powered-wheel arrangement helped simplify assembly, but it
+        created compromises during turning and on the spiral section.
+      </p>
+
+      <p>
+        I would also allow more time for track-specific calibration. The
+        embedded logic was capable of demonstrating the required behaviours
+        individually, but micromouse-style robots depend heavily on repeated
+        physical testing, small parameter changes, and tuning under the same
+        conditions they will face during demonstration.
+      </p>
+
+      <p>
+        From a software perspective, a stronger future version would move beyond
+        the course-state approach and toward a more structured navigation
+        strategy. This could include better cell tracking, more reliable
+        distance sensing, and eventually a true maze-solving algorithm once the
+        sensing and drivetrain were stable enough to support it.
+      </p>
+    </ContentBlock>
+
+    <ContentBlock title="Skills Developed">
+      <p>
+        This project helped develop practical skills across embedded systems,
+        PCB design, mechanical packaging, robotics, debugging, and system
+        integration. It was especially valuable because the final performance
+        depended on the interaction between all subsystems rather than any
+        single discipline in isolation.
+      </p>
+
+      <div class="skills-grid">
+        <div>
+          <h3>Embedded Systems</h3>
+          <p>
+            STM32CubeIDE, timer interrupts, GPIO interrupts, PWM motor control,
+            encoder counting, super loop structure, and state-machine logic.
+          </p>
+        </div>
+
+        <div>
+          <h3>Electronics and PCB Design</h3>
+          <p>
+            Custom upper and lower PCB design, SMD soldering, connector
+            selection, voltage regulation, power distribution, I2C
+            experimentation, and board-level debugging.
+          </p>
+        </div>
+
+        <div>
+          <h3>Mechanical Integration</h3>
+          <p>
+            Two-level robot packaging, motor mounting, battery placement,
+            drivetrain iteration, wire management, traction trade-offs, and
+            compact 3D printed structural parts.
+          </p>
+        </div>
+
+        <div>
+          <h3>Testing and Debugging</h3>
+          <p>
+            Sensor calibration, encoder turn testing, track-based tuning, fault
+            finding, drivetrain debugging, and working through the difference
+            between a designed system and a reliable physical robot.
+          </p>
+        </div>
+      </div>
+    </ContentBlock>
+
+    <ProjectMediaGrid
+      layout="stack"
+      media={[
+        {
+          // Image should be:
+          // A final reflective closing image, ideally Theseus 3 on the spiral,
+          // maze, or course with the lecture theatre or track visible.
+          src: "/Micro_Mouse/Micro_Mouse_Spiral_Shot.jpg",
+          alt: "Final image of Theseus 3 on the obstacle course, representing the completed micromouse project",
+        },
+      ]}
+    />
+  </section>
+</ProjectWriteupLayout>
+
+<style>
+  .code-summary {
+    margin-top: 1.25rem;
+  }
+
+  .code-summary-title {
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+  }
+
+  .code-highlight {
+    overflow-x: auto;
+    padding: 1rem;
+    border-radius: 14px;
+    border: 1px solid var(--border-soft, rgba(255, 255, 255, 0.18));
+    background: rgba(0, 0, 0, 0.28);
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+
+  .code-highlight code {
+    font-family:
+      "Cascadia Code",
+      "Fira Code",
+      Consolas,
+      monospace;
+  }
+
+  .skills-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    margin-top: 1.25rem;
+  }
+
+  .skills-grid > div {
+    padding: 1rem;
+    border-radius: 14px;
+    border: 1px solid var(--border-soft, rgba(255, 255, 255, 0.18));
+    background: rgba(255, 255, 255, 0.035);
+  }
+
+  .skills-grid h3 {
+    margin: 0 0 0.5rem;
+    font-size: 1rem;
+  }
+
+  .skills-grid p {
+    margin: 0;
+  }
+
+  @media (max-width: 760px) {
+    .skills-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

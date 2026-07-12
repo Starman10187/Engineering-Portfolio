@@ -1,0 +1,218 @@
+---
+/* =========================================================
+   Project Card Props
+   ========================================================= */
+
+/*
+  These are the values this card expects to receive from index.astro
+  or from your central projects data file.
+*/
+interface Props {
+  title: string;
+  description: string;
+  href: string;
+  image?: string;
+  images?: string[];
+  tags?: string[];
+}
+
+/* =========================================================
+   Pull values from Astro.props
+   ========================================================= */
+
+const {
+  title,
+  description,
+  href,
+  image,
+  images = [],
+  tags = [],
+} = Astro.props;
+
+/* =========================================================
+   Image handling
+   ========================================================= */
+
+/*
+  This lets the card work with either:
+
+  image="/example.jpg"
+
+  or:
+
+  images={[
+    "/example-1.jpg",
+    "/example-2.jpg",
+    "/example-3.jpg"
+  ]}
+
+  If images[] exists, it uses that.
+  Otherwise, it falls back to the single image.
+*/
+const galleryImages = images.length > 0 ? images : image ? [image] : [];
+---
+
+<!-- =======================================================
+     Project card wrapper
+     The whole card is clickable.
+     ======================================================= -->
+
+<a class="project-card" href={href}>
+
+  <!-- =====================================================
+       Image area
+       Shows either one large image or a small image gallery.
+       ===================================================== -->
+
+  {galleryImages.length > 0 && (
+    <div class={galleryImages.length > 1 ? `image-gallery count-${Math.min(galleryImages.length, 3)}` : "single-image"}>
+      {galleryImages.slice(0, 3).map((src, index) => (
+        <div class={`image-wrap image-${index + 1}`}>
+          <img 
+            src={src} 
+            alt={`${title} project image ${index + 1}`} 
+            loading="lazy" 
+          />
+        </div>
+      ))}
+    </div>
+  )}
+
+  <!-- =====================================================
+       Text content
+       ===================================================== -->
+
+  <div class="card-content">
+    <h2>{title}</h2>
+
+    <p>{description}</p>
+
+    <!-- ===================================================
+         Project tags
+         =================================================== -->
+
+    {tags.length > 0 && (
+      <ul class="tags">
+        {tags.map((tag) => (
+          <li>{tag}</li>
+        ))}
+      </ul>
+    )}
+  </div>
+</a>
+
+<style>
+  /* =======================================================
+     Card container
+     ======================================================= */
+
+  .project-card {
+    display: block;
+    min-width: 0;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: 1rem;
+    background: var(--bg-card);
+    color: inherit;
+    text-decoration: none;
+    transition:
+      transform 160ms ease,
+      border-color 160ms ease,
+      background 160ms ease,
+      box-shadow 160ms ease;
+  }
+
+  .project-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--accent);
+    background: var(--bg-card-hover);
+    box-shadow: 0 0 24px var(--accent-glow);
+  }
+
+  /* =======================================================
+     Single image layout
+     ======================================================= */
+
+  .single-image {
+    aspect-ratio: 16 / 9;
+    background: var(--bg-main);
+    overflow: hidden;
+  }
+
+  /* =======================================================
+     Multi-image gallery layout
+     ======================================================= */
+
+  .image-gallery {
+    display: grid;
+    gap: 0.35rem;
+    padding: 0.35rem;
+    aspect-ratio: 16 / 6;
+    background: var(--bg-main);
+  }
+
+  .image-gallery.count-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .image-gallery.count-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .image-wrap {
+    overflow: hidden;
+    background: var(--bg-main);
+    border-radius: 0.65rem;
+    height: 100%;
+  }
+
+  .image-wrap img,
+  .single-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  /* =======================================================
+     Card text content
+     ======================================================= */
+
+  .card-content {
+    padding: 1rem;
+  }
+
+  h2 {
+    margin: 0 0 0.5rem;
+    color: var(--text-main);
+    font-size: 1.15rem;
+  }
+
+  p {
+    margin: 0;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+
+  /* =======================================================
+     Tags
+     ======================================================= */
+
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    list-style: none;
+    margin: 0.9rem 0 0;
+    padding: 0;
+  }
+
+  .tags li {
+    padding: 0.25rem 0.5rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    color: var(--accent);
+    background: var(--accent-soft);
+    font-size: 0.75rem;
+  }
+</style>

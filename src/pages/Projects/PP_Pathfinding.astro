@@ -1,0 +1,417 @@
+---
+import ProjectWriteupLayout from "../../components/ProjectPageTemplating/ProjectWriteupLayout.astro";
+import ProjectMediaGrid from "../../components/ProjectPageTemplating/ProjectMediaGrid.astro";
+import ContentBlock from "../../components/ProjectPageTemplating/ContentBlock.astro";
+import PathfindingDemo from "../../components/ProjectPageTemplating/PathfindingDemo.astro";
+---
+
+<ProjectWriteupLayout
+  title="Risk-aware Pathfinding and Trajectory Planning"
+  intro="A MATLAB-based autonomous navigation simulation comparing A* and Greedy Best-First Search for a mobile robot travelling through an obstacle-filled soccer field environment."
+>
+
+ <!-- =====================================================
+       00. INTERACTIVE SHOWCASE
+       ===================================================== -->
+
+  <div slot="showcase">
+    <ContentBlock title="Interactive Pathfinding Demonstration">
+<p>
+        
+        This interactive demo recreates the final MATLAB simulation logic as a browser-based
+        pathfinding tool. It allows the obstacle width to be adjusted from 1 m to 12 m and
+        compares how A* and Greedy Best-First Search (BFS) respond to the same obstacle layout.
+      </p>
+
+      <p>
+        A* includes a risk penalty, so it tends to favour safer paths around high-risk zones.
+        Greedy Best-First Search uses a more direct heuristic approach, which can produce shorter
+        routes but is more likely to travel through riskier areas as obstacle size increases.
+      </p>
+
+      <PathfindingDemo />
+
+    </ContentBlock>
+  </div>
+
+
+  <!-- =====================================================
+       01. PROJECT OVERVIEW
+       ===================================================== -->
+
+  <div slot="overview">
+  <div class="overview-stack">
+    <!-- =====================================================
+         Interactive demo placed first for visual impact
+         ===================================================== -->
+
+      <!--<PathfindingDemo /> -->
+    </ContentBlock>
+
+    <!-- =====================================================
+         Written project overview
+         ===================================================== -->
+
+    <ContentBlock title="Project Summary">
+      <p>
+        This project investigated pathfinding strategies for an autonomous mobile robot navigating
+        across a simulated soccer field environment based on the AGVC 2013 autonomous robotics
+        challenge. The robot was required to visit four predefined target locations while avoiding
+        collisions with rectangular obstacles placed throughout the field.
+      </p>
+
+      <p>
+        The simulation was developed in MATLAB and compared two informed search algorithms:
+        A* Search and Greedy Best-First Search. The project focused on more than simply finding
+        a valid route, as a hazard proximity map was also introduced to represent risk around
+        obstacles. This allowed the navigation behaviour to be compared in terms of both route
+        efficiency and exposure to unsafe areas.
+      </p>
+    </ContentBlock>
+
+     <ProjectMediaGrid
+        layout="stack"
+        media={[
+          {
+            kind: "image",
+            src: "/Pathfinding/Pathfinding_Overview.JPG",
+            alt: "Hazard Map displayed on matlab",
+            caption: "240 x 180 cell course overview, A* search (middle bottom) Greedy (right bottom)",
+          },
+        ]}
+      />
+    
+  </div>
+</div>
+
+  <!-- =====================================================
+       02. KEY FEATURES
+       ===================================================== -->
+
+  <div slot="key-features">
+    <div class="feature-list">
+      <ContentBlock title="MATLAB-based Autonomous Navigation Simulation">
+        <p>
+          The simulation modelled a 120 m by 90 m soccer field as a two-dimensional grid, allowing
+          robot motion, obstacles, target zones, and path planning behaviour to be represented in
+          a structured and repeatable format.
+        </p>
+      </ContentBlock>
+
+      <ContentBlock title="Risk-aware Path Planning">
+        <p>
+          A hazard proximity map, referred to as the Danger Map, was generated around obstacles to
+          represent unstable or undesirable terrain. This allowed the A* algorithm to include an
+          additional risk penalty when selecting paths through the field.
+        </p>
+      </ContentBlock>
+
+      <ContentBlock title="A* and Greedy Search Comparison">
+        <p>
+          A* Search was used as the primary risk-aware planning method, while Greedy Best-First
+          Search was implemented as a comparison method. This made it possible to compare a
+          cost-aware algorithm against a more direct heuristic-driven search strategy.
+        </p>
+      </ContentBlock>
+
+      <ContentBlock title="Animated Visualisation and Subplots">
+        <p>
+          MATLAB plotting and animation tools were used to visualise the robot trajectory,
+          obstacle layout, occupancy map, hazard proximity map, and algorithm behaviour. This
+          made it easier to interpret how each algorithm responded to different obstacle sizes
+          and risk conditions.
+        </p>
+      </ContentBlock>
+    </div>
+  </div>
+
+  <!-- =====================================================
+       03. TECHNICAL DEVELOPMENT
+       ===================================================== -->
+
+  <div slot="technical-development">
+    <div class="technical-section">
+      <ContentBlock title="Simulation Environment and Grid Setup">
+        <p>
+          The field was modelled as a 120 m by 90 m environment and divided into a grid using
+          a 0.5 m cell resolution. This produced a 240 by 180 cell search space, balancing
+          computational performance with enough spatial resolution for robot movement and
+          obstacle interaction.
+        </p>
+
+        <p>
+          The robot started near the centreline of the left edge of the field at coordinates
+          (0.25, 45.25). Four circular target zones were placed at known field locations, with
+          each target represented as a small 2 by 2 cell goal region to make collision-free goal
+          detection more reliable.
+        </p>
+      </ContentBlock>
+
+      <ProjectMediaGrid
+        layout="stack"
+        media={[
+          {
+            kind: "image",
+            src: "/Pathfinding/Pathfinding_Grid.png",
+            alt: "Hazard Map displayed on matlab",
+            caption: "240 x 180 cell generation before populating with obstacles.",
+          },
+        ]}
+      />
+
+      <ContentBlock title="Obstacle and Occupancy Map Modelling">
+        <p>
+          Fifteen rectangular obstacles were placed at fixed central positions throughout the
+          field. Their widths were varied across simulation runs, with the longer edge defined
+          as twice the obstacle width. This allowed the same navigation problem to be tested
+          under increasingly constrained obstacle conditions.
+        </p>
+
+        <p>
+          An occupancy map was generated by checking each grid cell against the obstacle geometry.
+          Cells overlapping an obstacle were marked as blocked and excluded from the valid search
+          space used by the pathfinding algorithms.
+        </p>
+      </ContentBlock>
+
+      <ProjectMediaGrid
+        layout="stack"
+        media={[
+          {
+            kind: "image",
+            src: "/Pathfinding/Pathfinding_Occupancy_Map.png",
+            alt: "Hazard Map displayed on matlab",
+            caption: "The generated map demonstrates all traversible cells within the field, obstacles are masked in white, traversible cells in black.",
+          },
+        ]}
+      />
+
+      <ContentBlock title="Danger Map and Risk Penalty">
+        <p>
+          In addition to the binary occupancy map, a Danger Map was created to represent hazard
+          proximity around obstacles. Grid cells near obstacles were assigned increasing risk
+          levels based on their Manhattan distance from the nearest obstacle, with risk extending
+          outward within a 6-cell radius.
+        </p>
+
+        <p>
+          The A* algorithm incorporated this risk map by adding a danger penalty to the cost
+          function. This encouraged the robot to avoid high-risk zones where possible, even when
+          the safer route required a longer path.
+        </p>
+
+        <p class="code-line">
+          f(n) = g(n) + h(n) + dangerPenalty
+        </p>
+      </ContentBlock>
+
+      <ProjectMediaGrid
+        layout="stack"
+        media={[
+          {
+            kind: "image",
+            src: "/Pathfinding/Pathfinding_Hazard_Map.png",
+            alt: "Hazard Map displayed on matlab",
+            caption: "Colourized hazard map, closer to the obstacles incurs a higher cost as this is higher risk of entanglement, bogged vehicle etc...",
+          },
+        ]}
+      />
+
+      <ContentBlock title="Pathfinding Implementation">
+        <p>
+          Both algorithms operated on the same grid environment, with robot movement limited to
+          four directions: up, down, left, and right. The pathfinding logic was structured into
+          reusable segment-level functions, allowing the robot to move between successive target
+          regions using the same planning process.
+        </p>
+
+        <p>
+          Before path planning, the target visitation order was optimised by testing permutations
+          of the target sequence and selecting the route with the lowest Euclidean travel cost.
+          This kept the target order consistent between A* and Greedy, allowing their behaviour
+          to be compared more fairly.
+        </p>
+      </ContentBlock>
+
+      <ContentBlock title="A* Search Behaviour">
+        <p>
+          A* combined the cost already travelled, the estimated cost to the target, and the
+          additional danger penalty. This made it more suitable for risk-aware navigation because
+          it could favour safer paths instead of simply selecting the most direct route.
+        </p>
+
+        <p>
+          In the simulation results, A* maintained fully safe paths for obstacle widths between
+          1 m and 8 m. As the obstacle width increased beyond this point, the environment became
+          more constrained and the algorithm began accepting low, medium, and eventually high-risk
+          cells where no fully safe route was available.
+        </p>
+      </ContentBlock>
+
+      <ContentBlock title="Greedy Best-First Search Behaviour">
+        <p>
+          Greedy Best-First Search used only the heuristic distance to the target when selecting
+          the next cell. This made the method more direct, but it did not consider cumulative path
+          cost or the longer-term safety of the route.
+        </p>
+
+        <p>
+          This behaviour became clear as obstacle widths increased. Greedy often produced shorter
+          routes than A*, but it entered high-risk areas much more frequently because it prioritised
+          progress toward the target over risk avoidance.
+        </p>
+      </ContentBlock>
+
+      <ContentBlock title="Results and Performance Comparison">
+        <p>
+          The results showed a clear trade-off between path safety and directness. At 12 m obstacle
+          width, A* travelled 915 cells and included 26 high-risk cells. Greedy travelled 795 cells,
+          but included 525 high-risk cells, meaning a large portion of its final path passed through
+          unsafe regions.
+        </p>
+
+        <div class="results-table-wrapper">
+          <table class="results-table">
+            <thead>
+              <tr>
+                <th>Algorithm</th>
+                <th>12 m Steps</th>
+                <th>Safe Cells</th>
+                <th>Low Risk</th>
+                <th>Medium Risk</th>
+                <th>High Risk</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr>
+                <td>A*</td>
+                <td>915</td>
+                <td>762</td>
+                <td>45</td>
+                <td>82</td>
+                <td>26</td>
+              </tr>
+
+              <tr>
+                <td>Greedy</td>
+                <td>795</td>
+                <td>148</td>
+                <td>44</td>
+                <td>78</td>
+                <td>525</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>
+          This comparison demonstrated that Greedy could produce a shorter path, but at the cost
+          of significantly greater risk exposure. A* produced a longer route, but remained much
+          more suitable for safety-conscious navigation.
+        </p>
+      </ContentBlock>
+
+      <ContentBlock title="Development Challenges">
+        <p>
+          A significant challenge involved managing MATLAB subplot visualisation. Combining
+          obstacle overlays, occupancy maps, hazard maps, and animated robot paths introduced
+          issues with overlapping axes, inconsistent scaling, and visual clutter.
+        </p>
+
+        <p>
+          Animation updates also required careful handling. Earlier versions produced ghosting
+          effects or duplicate breadcrumb markers because previous plot elements were not always
+          cleared or updated correctly. The final implementation used more controlled plot updates
+          to show the robot movement while preserving the intended path trail.
+        </p>
+      </ContentBlock>
+    </div>
+  </div>
+
+  <!-- =====================================================
+       04. PROJECT OUTCOME
+       ===================================================== -->
+
+  <div slot="outcome">
+    <ContentBlock>
+      <p>
+        The final simulation successfully compared A* and Greedy Best-First Search within the
+        same obstacle-filled environment. The results showed that A* was better suited to
+        risk-aware navigation, while Greedy produced more direct paths that became increasingly
+        unsafe as obstacle size increased.
+      </p>
+
+      <p>
+        This project strengthened my understanding of autonomous navigation, grid-based simulation,
+        informed search algorithms, MATLAB visualisation, obstacle modelling, and the practical
+        trade-offs involved in designing path planning systems for mobile robots.
+      </p>
+
+      <p>
+        Future improvements would include dynamically scaling the danger penalty, replacing the
+        permutation-based target ordering method with a more scalable heuristic approach, adding
+        diagonal robot movement, and exploring a hybrid Greedy method with light risk weighting.
+      </p>
+    </ContentBlock>
+  </div>
+</ProjectWriteupLayout>
+
+<style>
+  /* =======================================================
+     Pathfinding page specific spacing
+     ======================================================= */
+
+ .overview-stack,
+.feature-list,
+.technical-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+  /* =======================================================
+     Formula styling
+     ======================================================= */
+
+  .code-line {
+    display: inline-block;
+    margin-top: 0.3rem;
+    padding: 0.55rem 0.75rem;
+    border-radius: 0.5rem;
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text-main);
+    font-family: monospace;
+  }
+
+  /* =======================================================
+     Results table
+     ======================================================= */
+
+  .results-table-wrapper {
+    overflow-x: auto;
+    margin: 1rem 0;
+  }
+
+  .results-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+  }
+
+  .results-table th,
+  .results-table td {
+    padding: 0.65rem 0.75rem;
+    border: 1px solid var(--accent-soft, rgba(255, 255, 255, 0.12));
+    text-align: left;
+  }
+
+  .results-table th {
+    color: var(--accent);
+    background: rgba(255, 255, 255, 0.04);
+  }
+
+  .results-table td {
+    color: var(--text-muted);
+  }
+</style>

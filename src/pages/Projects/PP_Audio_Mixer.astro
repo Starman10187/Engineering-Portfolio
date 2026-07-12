@@ -1,0 +1,190 @@
+---
+import ProjectWriteupLayout from "../../components/ProjectPageTemplating/ProjectWriteupLayout.astro";
+import ProjectMediaGrid from "../../components/ProjectPageTemplating/ProjectMediaGrid.astro";
+import ContentBlock from "../../components/ProjectPageTemplating/ContentBlock.astro";
+---
+
+<ProjectWriteupLayout
+  title="Deej Audio Mixer"
+  intro="A compact DIY desktop audio mixer built as one of my earliest mechatronics-related projects, introducing me to Arduino hardware, soldering, PCB assembly, and 3D printed electronics enclosures."
+>
+  <!-- =====================================================
+       01. PROJECT OVERVIEW
+       ===================================================== -->
+
+  <div slot="overview">
+    <ContentBlock>
+      <p>
+        This audio mixer was one of my earliest mechatronics-related projects,
+        completed before I began studying mechatronics engineering. It was built
+        as a compact DIY desktop controller for adjusting individual PC
+        application volumes using physical sliders.
+      </p>
+
+      <p>
+        The mixer provides a more tactile and convenient way to balance audio
+        between applications such as games, music, voice chat, and system sounds
+        without needing to open software volume menus. Although the project is
+        small in scale, it became an important first step into hands-on hardware
+        development.
+      </p>
+
+      <ProjectMediaGrid
+        layout="stack"
+        media={[
+          {
+            src: "/Audio_Mixer/Main_Photo_Audio_Mix.jpg",
+            alt: "Completed blue 3D printed Deej audio mixer with five physical slider controls and white application icons",
+            caption: "Completed desktop audio mixer with five physical sliders for controlling PC application volumes.",
+          },
+        ]}
+      />
+    </ContentBlock>
+  </div>
+
+  <!-- =====================================================
+       02. DESIGN BASIS AND KEY FEATURES
+       ===================================================== -->
+
+  <div slot="key-features">
+    <div class="feature-list">
+      <ContentBlock title="Design Basis and Credits">
+        <p>
+          This project is not an original electronics design. My build is based
+          on the open-source
+          <a href="https://github.com/omriharel/deej" target="_blank" rel="noreferrer">deej</a>
+          project by Omri Harel and the
+          <a href="https://ananords.com/products/deej-full-kit/" target="_blank" rel="noreferrer">Ananords deej full-kit</a>
+          design.
+        </p>
+
+        <p>
+          I originally discovered the concept through a
+          <a href="https://www.youtube.com/watch?v=NhG0H1O4nKM" target="_blank" rel="noreferrer">YouTube build video</a>
+          and used it as an opportunity to learn the practical skills involved
+          in building a small hardware project, including Arduino setup,
+          soldering, PCB assembly, enclosure fabrication, and final device
+          assembly.
+        </p>
+      </ContentBlock>
+
+      <ContentBlock title="Key Features">
+        <ul>
+          <li>Five physical slider controls for individual PC audio channels.</li>
+          <li>Arduino-based USB control using the open-source deej software.</li>
+          <li>PCB-mounted slider potentiometers housed inside a compact 3D printed enclosure.</li>
+          <li>Custom printed top panel with raised application icons.</li>
+          <li>Two-colour FDM print created using manual filament changes.</li>
+        </ul>
+      </ContentBlock>
+    </div>
+  </div>
+
+  <!-- =====================================================
+       03. TECHNICAL DEVELOPMENT
+       ===================================================== -->
+
+  <div slot="technical-development">
+    <div class="technical-section">
+      <ContentBlock title="Electronics Assembly">
+        <p>
+          The electronics were assembled around an Arduino-compatible controller,
+          sliding potentiometers, and a PCB based on the Ananords/deej hardware
+          design. The potentiometers provide the physical slider input, while the
+          controller communicates with the deej software running on the PC.
+        </p>
+
+        <p>
+          This was my first real exposure to soldering and PCB-based assembly.
+          The internal layout also gave me an early understanding of how
+          component placement, enclosure clearance, wiring access, and mechanical
+          fit all need to be considered together when turning a circuit into a
+          finished device.
+        </p>
+
+        <ProjectMediaGrid
+          layout="grid"
+          media={[
+            {
+              src: "/Audio_Mixer/Internal_View_Audio_Mixer_Pots.jpg",
+              alt: "Internal view of the audio mixer showing five slider potentiometers mounted inside the blue enclosure",
+              caption: "Internal view showing the five slider potentiometers mounted inside the enclosure.",
+            },
+            {
+              src: "/Audio_Mixer/Internal_View_Audio_Mixer_Soldering.jpg",
+              alt: "Underside of the Deej audio mixer PCB showing solder joints and Arduino-compatible controller connections",
+              caption: "PCB underside showing the soldered connections and controller mounting.",
+            },
+          ]}
+        />
+      </ContentBlock>
+
+      <ContentBlock title="3D Printed Enclosure and Two-colour Top Panel">
+        <p>
+          The enclosure was fabricated on my older Ender 3 V2, which had been
+          modified with BLTouch bed levelling and a belt-driven Z-axis upgrade
+          based on KevinAKASam’s design. The printed enclosure gave the project a
+          compact desktop form factor while keeping the sliders, PCB, and
+          controller neatly contained.
+        </p>
+
+        <p>
+          The top panel was also my first attempt at printing two colours in a
+          single part. While this is much easier with modern multi-material
+          systems, at the time it required more manual setup, careful timing, and
+          filament changes on the Ender 3 V2.
+        </p>
+
+        <ProjectMediaGrid
+          layout="stack"
+          media={[
+            {
+              src: "/Audio_Mixer/3D_Print_Multi_Colour_Audio_Mixer.jpg",
+              alt: "Blue 3D printed audio mixer top plate with white raised icons before final assembly",
+              caption: "Two-colour printed top panel with raised application icons before final assembly.",
+            },
+          ]}
+        />
+      </ContentBlock>
+    </div>
+  </div>
+
+  <!-- =====================================================
+       04. PROJECT OUTCOME
+       ===================================================== -->
+
+  <div slot="outcome">
+    <ContentBlock>
+      <p>
+        The final result was a functional desktop audio mixer with physical
+        controls for PC application volume. More importantly, it became my first
+        practical introduction to Arduino hardware, soldering, PCB assembly, 3D
+        printed enclosures, and small-scale electronics integration.
+      </p>
+
+      <p>
+        Looking back, the project is simple compared with my later engineering
+        work, but it was an important starting point. It helped build my
+        confidence with hands-on hardware and showed me how satisfying it was to
+        turn a digital design into a working physical product.
+      </p>
+    </ContentBlock>
+  </div>
+</ProjectWriteupLayout>
+
+<style>
+  /* =======================================================
+     Audio mixer page specific spacing
+     ======================================================= */
+
+  .feature-list,
+  .technical-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  a {
+    color: var(--accent);
+  }
+</style>
