@@ -3,10 +3,6 @@
    Project Card Props
    ========================================================= */
 
-/*
-  These are the values this card expects to receive from index.astro
-  or from your central projects data file.
-*/
 interface Props {
   title: string;
   description: string;
@@ -14,6 +10,13 @@ interface Props {
   image?: string;
   images?: string[];
   tags?: string[];
+
+  /*
+    These optional settings allow the image display to be
+    adjusted separately for each project.
+  */
+  imageFit?: "cover" | "contain";
+  imagePosition?: string;
 }
 
 /* =========================================================
@@ -27,51 +30,42 @@ const {
   image,
   images = [],
   tags = [],
+  imageFit = "cover",
+  imagePosition = "center",
 } = Astro.props;
 
 /* =========================================================
    Image handling
    ========================================================= */
 
-/*
-  This lets the card work with either:
-
-  image="/example.jpg"
-
-  or:
-
-  images={[
-    "/example-1.jpg",
-    "/example-2.jpg",
-    "/example-3.jpg"
-  ]}
-
-  If images[] exists, it uses that.
-  Otherwise, it falls back to the single image.
-*/
 const galleryImages = images.length > 0 ? images : image ? [image] : [];
 ---
 
 <!-- =======================================================
      Project card wrapper
-     The whole card is clickable.
      ======================================================= -->
 
 <a class="project-card" href={href}>
 
   <!-- =====================================================
        Image area
-       Shows either one large image or a small image gallery.
        ===================================================== -->
 
   {galleryImages.length > 0 && (
-    <div class={galleryImages.length > 1 ? `image-gallery count-${Math.min(galleryImages.length, 3)}` : "single-image"}>
+    <div
+      class={
+        galleryImages.length > 1
+          ? `image-gallery count-${Math.min(galleryImages.length, 3)}`
+          : "single-image"
+      }
+    >
       {galleryImages.slice(0, 3).map((src, index) => (
         <div class={`image-wrap image-${index + 1}`}>
-          <img 
-            src={src} 
-            alt={`${title} project image ${index + 1}`} 
-            loading="lazy" 
+          <img
+            src={src}
+            alt={`${title} project image ${index + 1}`}
+            loading="lazy"
+            style={`object-fit: ${imageFit}; object-position: ${imagePosition};`}
           />
         </div>
       ))}
@@ -135,8 +129,8 @@ const galleryImages = images.length > 0 ? images : image ? [image] : [];
 
   .single-image {
     aspect-ratio: 16 / 9;
-    background: var(--bg-main);
     overflow: hidden;
+    background: var(--bg-main);
   }
 
   /* =======================================================
@@ -160,18 +154,28 @@ const galleryImages = images.length > 0 ? images : image ? [image] : [];
   }
 
   .image-wrap {
-    overflow: hidden;
-    background: var(--bg-main);
-    border-radius: 0.65rem;
     height: 100%;
+    overflow: hidden;
+    border-radius: 0.65rem;
+    background: var(--bg-main);
   }
+
+  /* =======================================================
+     Image display
+     ======================================================= */
 
   .image-wrap img,
   .single-image img {
+    display: block;
     width: 100%;
     height: 100%;
+
+    /*
+      These provide sensible defaults if no project-specific
+      settings are supplied.
+    */
     object-fit: cover;
-    display: block;
+    object-position: center;
   }
 
   /* =======================================================
@@ -202,17 +206,17 @@ const galleryImages = images.length > 0 ? images : image ? [image] : [];
     display: flex;
     flex-wrap: wrap;
     gap: 0.45rem;
-    list-style: none;
     margin: 0.9rem 0 0;
     padding: 0;
+    list-style: none;
   }
 
   .tags li {
     padding: 0.25rem 0.5rem;
     border: 1px solid var(--border);
     border-radius: 999px;
-    color: var(--accent);
     background: var(--accent-soft);
+    color: var(--accent);
     font-size: 0.75rem;
   }
 </style>

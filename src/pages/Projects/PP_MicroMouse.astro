@@ -650,13 +650,15 @@ while (EntryCondition == true)
   }
 
   .code-highlight {
-    overflow-x: auto;
+    overflow-x: hidden;
     padding: 1rem;
     border-radius: 14px;
     border: 1px solid var(--border-soft, rgba(255, 255, 255, 0.18));
     background: rgba(0, 0, 0, 0.28);
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     line-height: 1.5;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
   }
 
   .code-highlight code {
@@ -665,6 +667,8 @@ while (EntryCondition == true)
       "Fira Code",
       Consolas,
       monospace;
+    white-space: inherit;
+    overflow-wrap: inherit;
   }
 
   .skills-grid {
