@@ -1,0 +1,122 @@
+---
+/* =========================================================
+   Reusable work-in-progress notice
+
+   Displays:
+   - Large rotating cog
+   - Work in Progress heading
+   - Custom project status message
+   ========================================================= */
+
+interface Props {
+  message?: string;
+}
+
+const {
+  message = "This project page is currently being documented.",
+} = Astro.props;
+---
+
+<section class="work-in-progress" aria-labelledby="work-in-progress-title">
+  <div class="wip-cog" aria-hidden="true">⚙</div>
+
+  <h2 id="work-in-progress-title">
+    Work in Progress
+  </h2>
+
+  <p>
+    {message}
+  </p>
+</section>
+
+<style>
+  /* =======================================================
+     Work-in-progress panel
+     ======================================================= */
+
+  .work-in-progress {
+    display: flex;
+    min-height: 22rem;
+    margin: 2rem 0;
+    padding: 3rem 2rem;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+
+    border: 1px solid var(--border, rgba(255, 255, 255, 0.15));
+    border-radius: 0.75rem;
+
+    background: var(--bg-panel, rgba(255, 255, 255, 0.03));
+  }
+
+  /* =======================================================
+     Rotating cog
+     ======================================================= */
+
+  .wip-cog {
+    display: inline-block;
+    margin-bottom: 1.25rem;
+
+    color: var(--accent, #7aa2f7);
+    font-family: "Segoe UI Symbol", sans-serif;
+    font-size: clamp(6rem, 14vw, 9rem);
+    line-height: 1;
+
+    animation: gear-spin 2s linear infinite;
+    transform-origin: center;
+  }
+
+  @keyframes gear-spin {
+    from {
+      transform: rotate(0deg);
+    }
+
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* =======================================================
+     Status text
+     ======================================================= */
+
+  .work-in-progress h2 {
+    margin: 0;
+
+    color: var(--text-main, inherit);
+    font-size: clamp(1.5rem, 4vw, 2rem);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .work-in-progress p {
+    max-width: 34rem;
+    margin: 0.9rem 0 0;
+
+    color: var(--text-muted, inherit);
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+
+  /* =======================================================
+     Accessibility
+     ======================================================= */
+
+  @media (prefers-reduced-motion: reduce) {
+    .wip-cog {
+      animation: none;
+    }
+  }
+
+  /* =======================================================
+     Mobile layout
+     ======================================================= */
+
+  @media (max-width: 600px) {
+    .work-in-progress {
+      min-height: 18rem;
+      padding: 2rem 1.25rem;
+    }
+  }
+</style>
